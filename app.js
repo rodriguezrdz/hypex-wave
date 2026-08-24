@@ -1083,7 +1083,7 @@ function pgTeam(mc) {
   });
   tt.querySelectorAll("[data-mdel]").forEach((b) => b.addEventListener("click", () => removeMember(Number(b.dataset.mdel))));
 }
-function sendInvite() {
+async function sendInvite() {
   const nm = $("iname").value.trim();
   const em = $("imail").value.trim();
   const role = $("irole").value;
