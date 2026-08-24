@@ -286,18 +286,18 @@ function loginInfoText() {
     $("lnamefield").style.display = signupMode ? "block" : "none";
     $("lforgot").style.display = signupMode ? "none" : "inline";
     $("ltogglemode").textContent = signupMode ? "Já tenho conta" : "Criar conta";
-    $("lbtn").textContent = signupMode ? "✨ CRIAR MINHA CONTA" : "⚡ ENTRAR NA PLATAFORMA";
+    $("lbtn").innerHTML = signupMode ? '<i data-lucide="user-plus"></i> CRIAR MINHA CONTA' : '<i data-lucide="zap"></i> ENTRAR NA PLATAFORMA'; icons();
     $("lnote").textContent = "Dados sincronizados na nuvem (Supabase)";
   } else {
     $("lmodebadge").className = "lmodebadge lmode-local";
     $("lmodebadge").textContent = "MODO LOCAL";
     $("linfo").style.display = "block";
     $("linfo").innerHTML = "<strong>Contas de acesso:</strong><br>rodriguez.founder@gmail.com · admin@hypexwave.com · owner@hypexwave.com<br>Senha: qualquer, com 4+ caracteres." +
-      (((window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.key) && !cfg) ? "<br><br>🔑 Chave do Supabase já configurada — falta só a <strong>Project URL</strong>. Entre e abra o menu <strong>Banco de Dados</strong> para colar." : "");
+      (((window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.key) && !cfg) ? "<br><br>Chave do Supabase já configurada — falta só a <strong>Project URL</strong>. Entre e abra o menu <strong>Banco de Dados</strong> para colar." : "");
     $("lnamefield").style.display = "none";
     $("lforgot").style.display = "none";
     $("ltogglemode").textContent = "Conectar banco de dados";
-    $("lbtn").textContent = "⚡ ENTRAR NA PLATAFORMA";
+    $("lbtn").innerHTML = '<i data-lucide="zap"></i> ENTRAR NA PLATAFORMA'; icons();
     $("lnote").textContent = "⚠ Modo local — dados salvos apenas neste navegador";
   }
 }
@@ -487,6 +487,11 @@ function renderPage(p) {
   const pages = { dashboard: pgDashboard, tasks: pgTasks, planning: pgPlanning, products: pgProducts, vitrine: pgVitrine, sales: pgSales, financial: pgFinancial, team: pgTeam, individual: pgIndividual, ads: pgAds, campaigns: pgCampaigns, integrations: pgIntegrations, funnels: pgFunnels, appearance: pgAppearance, database: pgDatabase, admin: pgAdmin, roles: pgRoles };
   if (pages[p]) pages[p](mc);
   else mc.innerHTML = '<div class="sh"><div class="stitle">Em desenvolvimento</div></div>';
+  mc.querySelectorAll(".g4,.g3,.g2,.g21,.g12,.kboard,.tabs,#intGrid,#campGrid").forEach((c) => {
+    c.classList.add("stagger");
+    Array.prototype.forEach.call(c.children, (ch, i) => ch.style.setProperty("--idx", Math.min(i, 10)));
+  });
+  icons();
 }
 function mobileNav(page, el) {
   document.querySelectorAll(".bnav-item").forEach((b) => b.classList.remove("active"));
@@ -500,13 +505,45 @@ function closeSidebar() { $("sb").classList.remove("mobile-open"); $("sbBackdrop
 
 // ===== TOAST / MODALS / PANELS =====
 let toastT;
+function icons() { if (window.lucide && window.lucide.createIcons) { try { window.lucide.createIcons(); } catch (e) {} } }
+function stripLeadSym(s) {
+  s = String(s == null ? "" : s);
+  while (s.length) {
+    const cp = s.codePointAt(0);
+    const sym = (cp >= 0x2190 && cp <= 0x2BFF) || (cp >= 0x1F000 && cp <= 0x1FAFF) || cp === 0xFE0F || cp === 0x2705 || cp === 0x274C || cp === 0x2757 || cp === 0x2714;
+    if (!sym) break;
+    s = s.slice(String.fromCodePoint(cp).length);
+  }
+  return s.replace(/^[ \t]+/, "");
+}
 function showToast(msg, type) {
+  type = type || "info";
   const t = $("toast");
-  const icons = { info: "ℹ️", ok: "✅", err: "❌", warn: "⚠️" };
-  t.innerHTML = (icons[type] || icons.info) + " " + msg;
+  t.dataset.type = type;
+  const clean = stripLeadSym(msg);
+  const ic = { info: "info", ok: "circle-check", err: "circle-x", warn: "triangle-alert" }[type] || "info";
+  t.innerHTML = '<i data-lucide="' + ic + '"></i><span>' + clean + "</span>";
+  icons();
   t.classList.add("show");
   clearTimeout(toastT);
   toastT = setTimeout(() => t.classList.remove("show"), 3400);
+}
+function countUp(scope) {
+  (scope || document).querySelectorAll("[data-count]").forEach((el) => {
+    const v = parseFloat(el.dataset.count);
+    if (isNaN(v)) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = fmtBRL(v); return; }
+    const sign = v < 0 ? "-" : "";
+    const av = Math.abs(v);
+    const t0 = performance.now(), dur = 950;
+    function step(t) {
+      const p = Math.min((t - t0) / dur, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmtBRL(Number(sign + (av * e).toFixed(2)));
+      if (p < 1) requestAnimationFrame(step); else el.textContent = fmtBRL(v);
+    }
+    requestAnimationFrame(step);
+  });
 }
 function openM(id) { $(id).classList.add("open"); }
 function closeM(id) { $(id).classList.remove("open"); }
@@ -572,15 +609,17 @@ function finMetrics() {
 function pgDashboard(mc) {
   const fm = finMetrics();
   const goalPct = Math.min((fm.income / (S.revenueTarget || 1)) * 100, 100);
+  const hr = new Date().getHours();
+  const greet = hr < 5 ? "Boa madrugada" : hr < 12 ? "Bom dia" : hr < 18 ? "Boa tarde" : "Boa noite";
   const kpis = [
-    { label: "Faturamento Bruto", val: fmtBRL(fm.income), chg: goalPct.toFixed(1) + "% da meta", up: true, ico: "💰" },
-    { label: "Resultado Líquido", val: fmtBRL(fm.balance), chg: "Margem " + fm.netMargin.toFixed(1) + "%", up: fm.balance >= 0, ico: "📈" },
-    { label: "Despesas Registradas", val: fmtBRL(fm.expenses), chg: (S.transactions || []).filter((t) => t.type === "Saída").length + " lançamentos", up: false, ico: "💸" },
-    { label: "Meta Atual", val: fmtBRL(S.revenueTarget), chg: goalPct.toFixed(1) + "% concluída", up: true, ico: "🎯", bar: goalPct },
-    { label: "Tx. Conversão Média", val: (S.products.reduce((a, p) => a + p.conv, 0) / (S.products.length || 1)).toFixed(1) + "%", chg: "entre produtos", up: true, ico: "🔄" },
-    { label: "Vendas (30 dias)", val: fmtNum((S.salesHistory || []).length), chg: (S.salesHistory || []).filter((s) => s.status === "Pendente").length + " pendentes", up: true, ico: "🧾" },
-    { label: "Campanhas Ativas", val: fmtNum(S.campaigns.filter((c) => c.status === "Ativa").length), chg: "de " + S.campaigns.length + " totais", up: true, ico: "📢" },
-    { label: "Tarefas Pendentes", val: fmtNum(S.tasks.todo.length + S.tasks.doing.length), chg: S.tasks.done.length + " concluídas", up: S.tasks.todo.length + S.tasks.doing.length <= 5, ico: "✅" }
+    { label: "Faturamento Bruto", val: fmtBRL(fm.income), count: fm.income, chg: goalPct.toFixed(1) + "% da meta", up: true, ico: "banknote", hero: true },
+    { label: "Resultado Líquido", val: fmtBRL(fm.balance), count: fm.balance, chg: "Margem " + fm.netMargin.toFixed(1) + "%", up: fm.balance >= 0, ico: "trending-up" },
+    { label: "Despesas Registradas", val: fmtBRL(fm.expenses), count: fm.expenses, chg: (S.transactions || []).filter((t) => t.type === "Saída").length + " lançamentos", up: false, ico: "hand-coins" },
+    { label: "Meta Atual", val: fmtBRL(S.revenueTarget), count: S.revenueTarget, chg: goalPct.toFixed(1) + "% concluída", up: true, ico: "target", bar: goalPct },
+    { label: "Tx. Conversão Média", val: (S.products.reduce((a, p) => a + p.conv, 0) / (S.products.length || 1)).toFixed(1) + "%", chg: "entre produtos", up: true, ico: "refresh-cw" },
+    { label: "Vendas (30 dias)", val: fmtNum((S.salesHistory || []).length), chg: (S.salesHistory || []).filter((s) => s.status === "Pendente").length + " pendentes", up: true, ico: "receipt-text" },
+    { label: "Campanhas Ativas", val: fmtNum(S.campaigns.filter((c) => c.status === "Ativa").length), chg: "de " + S.campaigns.length + " totais", up: true, ico: "megaphone" },
+    { label: "Tarefas Pendentes", val: fmtNum(S.tasks.todo.length + S.tasks.doing.length), chg: S.tasks.done.length + " concluídas", up: S.tasks.todo.length + S.tasks.doing.length <= 5, ico: "list-checks" }
   ];
   const monthsPt = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
   const byMonthInc = {}, byMonthExp = {};
@@ -601,8 +640,8 @@ function pgDashboard(mc) {
   });
 
   mc.innerHTML =
-    '<div class="sh flex aic jb"><div><div class="stitle">Dashboard <span style="font-size:13px;font-family:Inter;font-weight:400;color:var(--tx2)">— Visão Geral do Negócio</span></div><div class="ssub">Olá, ' + esc(S.user.name || "empreendedor") + ' 👋 — dados atualizados agora</div></div>' +
-    '<button class="bg" onclick="editGoal()">🎯 Definir meta</button></div>' +
+    '<div class="sh flex aic jb"><div><div class="stitle">Dashboard <span>— Visão Geral do Negócio</span></div><div class="ssub">' + greet + ", " + esc(S.user.name || "empreendedor") + " — tudo atualizado agora</div></div>" +
+    '<button class="bg" onclick="editGoal()"><i data-lucide="target"></i> Definir meta</button></div>' +
     '<div class="g4 ms" id="kpiGrid"></div>' +
     '<div class="g2 ms"><div class="gc"><div class="chead"><span class="ctitle">Receita vs Despesas</span><span class="txxs txm">6 meses</span></div><div class="chart-container" style="height:200px"><canvas id="chartRevExp"></canvas></div></div>' +
     '<div class="gc"><div class="chead"><span class="ctitle">Fluxo de Caixa Acumulado</span><span class="txxs txm">Por lançamento</span></div><div class="chart-container" style="height:200px"><canvas id="chartCash"></canvas></div></div></div>' +
@@ -613,24 +652,25 @@ function pgDashboard(mc) {
     '<div class="gc"><div class="chead"><span class="ctitle">Alertas & Notificações</span></div><div id="alertsList"></div></div></div>';
 
   const kg = $("kpiGrid");
-  kpis.forEach((k) => {
+  kpis.forEach((k, i) => {
     const d = document.createElement("div");
-    d.className = "gc";
-    d.innerHTML = '<div class="chead"><div class="ctitle">' + k.label + '</div><div class="cico">' + k.ico + '</div></div>' +
-      '<div class="cval" style="' + (k.val.indexOf("-") === 0 ? "color:var(--err)" : "") + '">' + k.val + '</div>' +
-      '<div class="cchg ' + (k.up ? "up" : "down") + '">' + (k.up ? "▲" : "▼") + " " + k.chg + "</div>" +
+    d.className = "gc" + (k.hero ? " hero" : "");
+    d.innerHTML = '<div class="chead"><div class="ctitle">' + k.label + '</div><div class="cico"><i data-lucide="' + k.ico + '"></i></div></div>' +
+      '<div class="cval"' + (typeof k.count === "number" ? ' data-count="' + k.count + '"' : "") + ">" + (typeof k.count === "number" ? "R$ 0,00" : k.val) + "</div>" +
+      '<div class="cchg">' + (k.up ? '<span class="up">▲</span>' : '<span class="down">▼</span>') + " " + k.chg + "</div>" +
       (typeof k.bar === "number" ? '<div class="pbar mt2"><div class="pbfill" style="width:' + k.bar.toFixed(1) + '%"></div></div>' : "");
     kg.appendChild(d);
   });
+  setTimeout(() => countUp(kg), 350);
   const tb = $("recentSales");
   (S.salesHistory || []).slice(0, 6).forEach((r) => {
     tb.innerHTML += "<tr><td>" + esc(r.product) + "</td><td style=\"color:var(--ok);font-family:'Space Mono',monospace\">" + fmtBRL(r.value) + '</td><td><span class="' + (r.status === "Pago" ? "bok" : "bwarn") + ' b">' + r.status + "</span></td><td style=\"color:var(--tx3)\">" + r.date.slice(0, 10) + "</td></tr>";
   });
   const alerts = computeAlerts();
   const al = $("alertsList");
-  if (!alerts.length) al.innerHTML = '<div class="empty-state"><div class="es-ico">🎉</div>Nenhum alerta. Tudo sob controle!</div>';
-  alerts.forEach((a) => {
-    al.innerHTML += '<div style="padding:9px 11px;margin-bottom:6px;background:rgba(0,217,255,0.04);border:1px solid var(--bd);border-radius:7px;font-size:11px;display:flex;gap:8px;align-items:center">' + a.icon + "<span>" + esc(a.msg) + "</span></div>";
+  if (!alerts.length) al.innerHTML = '<div class="empty-state"><div class="es-ico"><i data-lucide="sparkles"></i></div>Nenhum alerta. Tudo sob controle!</div>';
+  else alerts.forEach((a) => {
+    al.innerHTML += '<div style="padding:10px 12px;margin-bottom:7px;background:var(--surface-hi);border:1px solid var(--bd);border-radius:11px;font-size:12px;display:flex;gap:10px;align-items:center"><span style="color:var(--tx3);display:flex"><i data-lucide="' + a.icon + '"></i></span><span>' + esc(a.msg) + "</span></div>";
   });
 
   setTimeout(() => {
@@ -663,9 +703,9 @@ function pgTasks(mc) {
     '<div class="sh flex aic jb"><div><div class="stitle">Tarefas</div><div class="ssub">Kanban Board — arraste os cartões entre as colunas</div></div>' +
     '<button class="bp" onclick="openM(\'taskmod\')">+ Nova Tarefa</button></div>' +
     '<div class="kboard">' +
-    '<div class="kcol" id="col-todo" ondragover="dOver(event)" ondrop="dDrop(event,\'todo\')"><div class="kcolh"><span class="kcolt">📝 Para Fazer</span><span class="kcnt" id="cnt-todo">0</span></div><div class="kcards" id="cards-todo"></div></div>' +
-    '<div class="kcol" id="col-doing" ondragover="dOver(event)" ondrop="dDrop(event,\'doing\')"><div class="kcolh"><span class="kcolt" style="color:var(--warn)">⚙ Em Andamento</span><span class="kcnt" id="cnt-doing">0</span></div><div class="kcards" id="cards-doing"></div></div>' +
-    '<div class="kcol" id="col-done" ondragover="dOver(event)" ondrop="dDrop(event,\'done\')"><div class="kcolh"><span class="kcolt" style="color:var(--ok)">✔ Concluído</span><span class="kcnt" id="cnt-done">0</span></div><div class="kcards" id="cards-done"></div></div>' +
+    '<div class="kcol" id="col-todo" ondragover="dOver(event)" ondrop="dDrop(event,\'todo\')"><div class="kcolh"><span class="kcolt"><i data-lucide="circle-dashed"></i> Para Fazer</span><span class="kcnt" id="cnt-todo">0</span></div><div class="kcards" id="cards-todo"></div></div>' +
+    '<div class="kcol" id="col-doing" ondragover="dOver(event)" ondrop="dDrop(event,\'doing\')"><div class="kcolh"><span class="kcolt" style="color:var(--warn)"><i data-lucide="activity"></i> Em Andamento</span><span class="kcnt" id="cnt-doing">0</span></div><div class="kcards" id="cards-doing"></div></div>' +
+    '<div class="kcol" id="col-done" ondragover="dOver(event)" ondrop="dDrop(event,\'done\')"><div class="kcolh"><span class="kcolt" style="color:var(--ok)"><i data-lucide="circle-check"></i> Concluído</span><span class="kcnt" id="cnt-done">0</span></div><div class="kcards" id="cards-done"></div></div>' +
     "</div>";
   renderKanban();
 }
@@ -684,7 +724,7 @@ function renderKanban() {
         '<div class="kmeta"><div class="pdot ' + (t.pri === "high" ? "ph" : t.pri === "med" ? "pm" : "pl") + '"></div>' +
         '<div style="font-size:10px;color:var(--tx3)">' + esc(t.due || "") + "</div>" +
         '<div style="font-size:10px;color:var(--tx3)">' + esc(t.assignee || "") + "</div>" +
-        '<span class="kdel" data-del="' + t.id + "|" + col + '">🗑</span></div>';
+        '<span class="kdel" data-del="' + t.id + "|" + col + '"><i data-lucide="trash-2"></i></span></div>';
       d.addEventListener("dragstart", (e) => { dragCard = t; dragCol = col; d.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
       d.addEventListener("dragend", () => d.classList.remove("dragging"));
       d.querySelector("[data-del]").addEventListener("click", () => delTask(t.id, col));
@@ -693,6 +733,7 @@ function renderKanban() {
     const cnt = $("cnt-" + col);
     if (cnt) cnt.textContent = (S.tasks[col] || []).length;
   });
+  icons();
 }
 let dragCard = null, dragCol = null;
 function dOver(e) { e.preventDefault(); e.currentTarget.classList.add("drag-target"); }
@@ -724,7 +765,7 @@ function delTask(id, col) {
   logAndTouch("Tarefa removida: " + (t ? t.title : "#" + id));
   renderKanban();
   refreshNotifs();
-  showToast("🗑 Tarefa removida");
+  showToast("Tarefa removida");
 }
 
 
@@ -767,16 +808,16 @@ function renderCal() {
   }
   const el = $("eventList");
   el.innerHTML = "";
-  const catIcons = { meet: "🔵", launch: "🟢", dead: "🔴", pers: "🟡" };
+  const catIcons = { meet: '<span class="dot dot-b"></span>', launch: '<span class="dot dot-g"></span>', dead: '<span class="dot dot-r"></span>', pers: '<span class="dot dot-y"></span>' };
   const sorted = [...(S.events || [])].sort((a, b) => a.date.localeCompare(b.date));
   if (!sorted.length) { el.innerHTML = '<div class="empty-state">Nenhum evento cadastrado.<br>Clique num dia do calendário para criar.</div>'; return; }
   sorted.forEach((e) => {
     const dd = daysDiff(e.date);
     const rel = dd === 0 ? "Hoje" : dd === 1 ? "Amanhã" : dd > 1 ? "Em " + dd + " dias" : Math.abs(dd) + " dias atrás";
     el.innerHTML += '<div style="padding:10px;background:rgba(0,217,255,0.04);border:1px solid var(--bd);border-radius:8px;margin-bottom:7px;display:flex;gap:10px;align-items:center">' +
-      '<span style="font-size:18px">' + (catIcons[e.cat] || "📅") + "</span>" +
+      '<span style="font-size:18px">' + (catIcons[e.cat] || "") + "</span>" +
       '<div><div style="font-size:12px;font-weight:500">' + esc(e.title) + '</div><div style="font-size:10px;color:var(--tx3)">' + e.date + " · " + rel + '</div></div>' +
-      '<span class="kdel" data-evdel="' + e.id + '">🗑</span></div>';
+      '<span class="kdel" data-evdel="' + e.id + '"><i data-lucide="trash-2"></i></span></div>';
   });
   el.querySelectorAll("[data-evdel]").forEach((s) => s.addEventListener("click", () => delEvent(Number(s.dataset.evdel))));
 }
@@ -805,8 +846,8 @@ function pgProducts(mc) {
   mc.innerHTML =
     '<div class="sh flex aic jb"><div><div class="stitle">Produtos</div><div class="ssub">Gerencie seus produtos e afiliações</div></div>' +
     '<button class="bp" onclick="openM(\'prodmod\')">+ Novo Produto</button></div>' +
-    '<div class="tabs"><div class="tab ' + (t === "myprods" ? "active" : "") + '" data-ptab="myprods">📦 Meus Produtos</div>' +
-    '<div class="tab ' + (t === "affils" ? "active" : "") + '" data-ptab="affils">🔗 Minhas Afiliações</div></div>' +
+    '<div class="tabs"><div class="tab ' + (t === "myprods" ? "active" : "") + '" data-ptab="myprods"><i data-lucide="package"></i>&nbsp;Meus Produtos</div>' +
+    '<div class="tab ' + (t === "affils" ? "active" : "") + '" data-ptab="affils"><i data-lucide="link-2"></i>&nbsp;Minhas Afiliações</div></div>' +
     '<div id="prodContent"></div>';
   mc.querySelectorAll("[data-ptab]").forEach((el) => el.addEventListener("click", () => setProductsTab(el.dataset.ptab)));
   renderProductsTab(t);
@@ -853,7 +894,7 @@ function delProduct(id) {
   S.products = S.products.filter((x) => x.id !== id);
   logAndTouch("Produto removido: " + (p ? p.name : "#" + id));
   renderProductsTab(S.activeTabProducts || "myprods");
-  showToast("🗑 Produto removido");
+  showToast("Produto removido");
 }
 function delAffil(id) {
   S.affiliations = S.affiliations.filter((x) => x.id !== id);
@@ -866,7 +907,7 @@ function pgVitrine(mc) {
   mc.innerHTML =
     '<div class="sh"><div class="stitle">Vitrine</div><div class="ssub">Produtos validados e em teste</div></div>' +
     '<div class="g3">' + S.products.map((p) =>
-      '<div class="gc"><div style="font-size:18px;margin-bottom:9px">🏆</div>' +
+      '<div class="gc"><div style="color:var(--c);margin-bottom:9px;display:flex"><i data-lucide="trophy"></i></div>' +
       '<div class="orb" style="font-size:13px;font-weight:700;margin-bottom:4px">' + esc(p.name) + "</div>" +
       '<div style="font-size:11px;color:var(--tx2);margin-bottom:12px">' + esc(p.niche) + "</div>" +
       '<div class="flex jb mb2"><span class="txxs txm">Preço</span><span class="txs mono txc">' + fmtBRL(p.price) + "</span></div>" +
@@ -874,7 +915,7 @@ function pgVitrine(mc) {
       '<div class="flex jb mb3"><span class="txxs txm">Faturamento</span><span class="txs mono txok">' + fmtBRL(p.revenue) + "</span></div>" +
       '<div class="pbar"><div class="pbfill" style="width:' + Math.min(p.conv * 15, 100) + '%"></div></div></div>'
     ).join("") + "</div>" +
-    '<div class="gc mt4"><div class="chead"><span class="ctitle">⏳ Produtos em Teste (validação de 3 dias)</span><button class="bg" id="addTestBtn">+ Enviar para teste</button></div>' +
+    '<div class="gc mt4"><div class="chead"><span class="ctitle"><i data-lucide="hourglass"></i>&nbsp;Produtos em Teste (validação de 3 dias)</span><button class="bg" id="addTestBtn">+ Enviar para teste</button></div>' +
     '<div class="g3 mt2" id="testGrid"></div></div>';
   $("addTestBtn").addEventListener("click", addTestProduct);
   renderTestGrid();
@@ -888,7 +929,7 @@ function renderTestGrid() {
     const done = left <= 0;
     const dd = done ? "Concluído" : Math.floor(left / 86400000) + "d " + Math.floor((left % 86400000) / 3600000) + "h " + Math.floor((left % 3600000) / 60000) + "m " + Math.floor((left % 60000) / 1000) + "s";
     return '<div style="padding:14px;background:rgba(255,184,0,0.06);border:1px solid rgba(255,184,0,0.2);border-radius:9px">' +
-      '<div style="font-weight:600;font-size:13px;margin-bottom:6px">🧪 ' + esc(p.name) + "</div>" +
+      '<div style="font-weight:600;font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:7px"><i data-lucide="flask-conical"></i>' + esc(p.name) + "</div>" +
       '<div style="font-size:10px;color:var(--tx2);margin-bottom:8px">' + (done ? "Teste finalizado" : "Teste ativo") + "</div>" +
       '<div class="orb" style="font-size:14px;color:' + (done ? "var(--ok)" : "var(--warn)") + '">' + dd + "</div>" +
       '<div style="display:flex;gap:6px;margin-top:9px">' +
@@ -897,6 +938,7 @@ function renderTestGrid() {
   }).join("") || '<div class="empty-state" style="grid-column:1/-1">Nenhum produto em teste.</div>';
   g.querySelectorAll("[data-promote]").forEach((b) => b.addEventListener("click", () => promoteTestProduct(Number(b.dataset.promote))));
   g.querySelectorAll("[data-testdel]").forEach((b) => b.addEventListener("click", () => delTestProduct(Number(b.dataset.testdel))));
+  icons();
 }
 function addTestProduct() {
   const name = prompt("Nome do produto para teste:");
@@ -929,7 +971,7 @@ function pgSales(mc) {
     '<div class="sh flex aic jb"><div><div class="stitle">Minhas Vendas</div><div class="ssub">Relatórios de performance dos últimos 30 dias</div></div>' +
     '<div class="flex gap2"><select class="fi" id="salesFilterSel" style="width:170px;padding:7px 10px"><option value="">Todos os Produtos</option>' +
     S.products.map((p) => '<option value="' + esc(p.name) + '"' + (salesFilterProduct === p.name ? " selected" : "") + ">" + esc(p.name) + "</option>").join("") +
-    '</select><button class="bp" id="exportSalesBtn">⬇ Exportar CSV</button></div></div>' +
+    '</select><button class="bp" id="exportSalesBtn"><i data-lucide="download"></i> Exportar CSV</button></div></div>' +
     '<div class="g4 ms" id="salesKpis"></div>' +
     '<div class="g21 ms"><div class="gc"><div class="chead"><span class="ctitle">Vendas por Produto</span></div><div class="chart-container" style="height:220px"><canvas id="chartSalesBar"></canvas></div></div>' +
     '<div class="gc"><div class="chead"><span class="ctitle">Receita por Dia</span></div><div class="chart-container" style="height:220px"><canvas id="chartSalesLine"></canvas></div></div></div>' +
@@ -989,7 +1031,7 @@ function pgFinancial(mc) {
   const totalTx = (S.transactions || []).length || 1;
   mc.innerHTML =
     '<div class="sh flex aic jb"><div><div class="stitle">Financeiro</div><div class="ssub">Controle financeiro completo da empresa</div></div>' +
-    '<div class="flex gap2"><button class="bg" id="exportFinBtn">⬇ Exportar CSV</button><button class="bp" onclick="openM(\'transmod\')">+ Novo Lançamento</button></div></div>' +
+    '<div class="flex gap2"><button class="bg" id="exportFinBtn"><i data-lucide="download"></i> Exportar CSV</button><button class="bp" onclick="openM(\'transmod\')">+ Novo Lançamento</button></div></div>' +
     '<div class="g4 ms">' +
     '<div class="gc"><div class="ctitle mb2">Resultado Líquido</div><div class="cval" style="font-size:22px;color:' + (fm.balance >= 0 ? "var(--c)" : "var(--err)") + '">' + fmtBRL(fm.balance) + '</div><div class="cchg up">entradas − saídas</div></div>' +
     '<div class="gc"><div class="ctitle mb2">Entradas</div><div class="cval txok" style="font-size:22px">' + fmtBRL(fm.income) + '</div><div class="cchg up">▲ acumulado</div></div>' +
@@ -1000,8 +1042,8 @@ function pgFinancial(mc) {
     '<div><div class="gc mb3"><div class="chead"><span class="ctitle">Métodos Utilizados</span></div>' +
     Object.keys(methods).map((m) => '<div class="flex aic jb mb2"><span>' + esc(m) + '</span><span class="bcyan">' + Math.round(methods[m] / totalTx * 100) + '%</span></div>').join("") + "</div>" +
     '<div class="gc"><div class="chead"><span class="ctitle">Resumo por Tipo</span></div>' +
-    '<div class="flex aic jb mb2" style="font-size:12px"><span>🟢 Entradas</span><span style="color:var(--ok)">' + fmtBRL(fm.income) + "</span></div>" +
-    '<div class="flex aic jb mb2" style="font-size:12px"><span>🔴 Saídas</span><span style="color:var(--err)">' + fmtBRL(fm.expenses) + "</span></div>" +
+    '<div class="flex aic jb mb2" style="font-size:12px"><span class="flex aic gap2"><span class="dot dot-g"></span>Entradas</span><span style="color:var(--ok)">' + fmtBRL(fm.income) + "</span></div>" +
+    '<div class="flex aic jb mb2" style="font-size:12px"><span class="flex aic gap2"><span class="dot dot-r"></span>Saídas</span><span style="color:var(--err)">' + fmtBRL(fm.expenses) + "</span></div>" +
     '<div class="flex aic jb" style="font-size:12px;border-top:1px solid var(--bd);padding-top:8px"><span><strong>Líquido</strong></span><span style="color:' + (fm.balance >= 0 ? "var(--ok)" : "var(--err)") + '"><strong>' + fmtBRL(fm.balance) + "</strong></span></div></div></div></div>";
   $("exportFinBtn").addEventListener("click", exportFinCsv);
   renderExtract();
@@ -1016,7 +1058,7 @@ function renderExtract() {
     '<td><span class="' + (r.type === "Entrada" ? "bok" : "berr") + ' b">' + r.type + "</span></td>" +
     "<td style=\"color:" + (r.type === "Entrada" ? "var(--ok)" : "var(--err)") + ";font-family:'Space Mono',monospace\">" + (r.type === "Entrada" ? "+" : "−") + " " + fmtBRL(r.value) + "</td>" +
     "<td style=\"color:var(--tx3)\">" + r.date + "</td>" +
-    '<td><span class="kdel" data-trdel="' + r.id + '">🗑</span></td></tr>'
+    '<td><span class="kdel" data-trdel="' + r.id + '"><i data-lucide="trash-2"></i></span></td></tr>'
   ).join("");
   et.querySelectorAll("[data-trdel]").forEach((s) => s.addEventListener("click", () => delTransaction(Number(s.dataset.trdel))));
 }
@@ -1106,7 +1148,7 @@ function removeMember(id) {
   S.team = S.team.filter((x) => x.id !== id);
   logAndTouch("Membro removido: " + (m ? m.name : "#" + id));
   pgTeam($("mc"));
-  showToast("🗑 Membro removido");
+  showToast("Membro removido");
 }
 
 // ===== RELATÓRIO INDIVIDUAL =====
@@ -1133,9 +1175,9 @@ function showMemberReport(i) {
     '<div class="gc"><div class="ctitle mb2">Comissão do Mês</div><div class="cval" style="color:var(--warn);font-size:18px">' + fmtBRL(m.commission) + "</div></div>" +
     '<div class="gc"><div class="ctitle mb2">Comissão Acumulada</div><div class="cval" style="color:var(--warn);font-size:18px">' + fmtBRL(commAcc) + "</div></div></div>" +
     '<div class="g3 ms">' +
-    '<div class="gc"><div class="ctitle mb2">🏢 Empresa (85%)</div><div class="orb" style="font-size:28px;color:var(--c)">85%</div><div style="font-size:11px;color:var(--tx2);margin-top:4px">' + fmtBRL(m.revenue * 0.85) + "</div></div>" +
-    '<div class="gc"><div class="ctitle mb2">👤 Funcionário (10%)</div><div class="orb" style="font-size:28px;color:var(--ok)">10%</div><div style="font-size:11px;color:var(--tx2);margin-top:4px">' + fmtBRL(m.revenue * 0.1) + "</div></div>" +
-    '<div class="gc"><div class="ctitle mb2">🛡 Reserva Op. (5%)</div><div class="orb" style="font-size:28px;color:var(--warn)">5%</div><div style="font-size:11px;color:var(--tx2);margin-top:4px">' + fmtBRL(m.revenue * 0.05) + "</div></div></div>" +
+    '<div class="gc"><div class="ctitle mb2"><i data-lucide="building-2"></i> Empresa (85%)</div><div class="orb" style="font-size:28px;color:var(--c)">85%</div><div style="font-size:11px;color:var(--tx2);margin-top:4px">' + fmtBRL(m.revenue * 0.85) + "</div></div>" +
+    '<div class="gc"><div class="ctitle mb2"><i data-lucide="user"></i> Funcionário (10%)</div><div class="orb" style="font-size:28px;color:var(--ok)">10%</div><div style="font-size:11px;color:var(--tx2);margin-top:4px">' + fmtBRL(m.revenue * 0.1) + "</div></div>" +
+    '<div class="gc"><div class="ctitle mb2"><i data-lucide="shield-check"></i> Reserva Op. (5%)</div><div class="orb" style="font-size:28px;color:var(--warn)">5%</div><div style="font-size:11px;color:var(--tx2);margin-top:4px">' + fmtBRL(m.revenue * 0.05) + "</div></div></div>" +
     '<div class="gc tbl-wrap"><div class="chead"><span class="ctitle">Histórico de Comissões — ' + esc(m.name) + "</span></div>" +
     '<table class="dtable"><thead><tr><th>Período</th><th>Vendas</th><th>Faturamento</th><th>Comissão (10%)</th><th>Status</th></tr></thead><tbody>' +
     [1, 0.9, 0.8].map((f, idx) => {
@@ -1212,16 +1254,16 @@ function renderCampaigns() {
     const d = document.createElement("div");
     d.className = "gc";
     d.innerHTML = '<div class="flex aic jb mb3"><span class="orb" style="font-size:13px;font-weight:700">' + esc(c.name) + '</span><span class="' + (statCls[c.status] || "b") + ' b">' + esc(c.status) + "</span></div>" +
-      '<div style="font-size:11px;color:var(--tx2);margin-bottom:10px">📣 ' + esc(c.platform) + "</div>" +
+      '<div style="font-size:11px;color:var(--tx2);margin-bottom:10px"><i data-lucide="megaphone"></i> ' + esc(c.platform) + "</div>" +
       '<div class="flex jb txxs txm mb1"><span>Orçamento</span><span class="txs">' + fmtBRL(c.budget) + "</span></div>" +
       '<div class="flex jb txxs txm mb1"><span>Gasto</span><span class="txs" style="color:var(--warn)">' + fmtBRL(c.spend) + "</span></div>" +
       '<div class="flex jb txxs txm mb2"><span>ROI</span><span class="txs txc">' + c.roi + "%</span></div>" +
       '<div class="pbar"><div class="pbfill" style="width:' + pct.toFixed(1) + '%"></div></div>' +
       '<div style="font-size:9px;color:var(--tx3);margin-top:4px">' + pct.toFixed(0) + "% do orçamento utilizado</div>" +
       '<div class="flex gap2 mt3">' +
-      '<button class="bg" data-cstat="' + c.id + '" style="font-size:10px;flex:1">🔄 Status</button>' +
-      '<button class="bg" data-cspend="' + c.id + '" style="font-size:10px;flex:1">💸 Gasto</button>' +
-      '<button class="bg danger" data-campdel="' + c.id + '" style="font-size:10px">🗑</button></div>';
+      '<button class="bg" data-cstat="' + c.id + '" style="font-size:10px;flex:1"><i data-lucide="refresh-cw"></i> Status</button>' +
+      '<button class="bg" data-cspend="' + c.id + '" style="font-size:10px;flex:1"><i data-lucide="hand-coins"></i> Gasto</button>' +
+      '<button class="bg danger" data-campdel="' + c.id + '" style="font-size:10px"><i data-lucide="trash-2"></i></button></div>';
     d.querySelector("[data-cstat]").addEventListener("click", () => cycleCampaignStatus(c.id));
     d.querySelector("[data-cspend]").addEventListener("click", () => addCampaignSpend(c.id));
     d.querySelector("[data-campdel]").addEventListener("click", () => delCampaign(c.id));
@@ -1262,17 +1304,17 @@ function addCampaign() {
 
 // ===== INTEGRAÇÕES =====
 const INT_LIST = [
-  { key: "meta", name: "Meta Ads", icon: "📱", desc: "Facebook & Instagram Ads" },
-  { key: "google", name: "Google Ads", icon: "🔍", desc: "Search & Display" },
-  { key: "tiktok", name: "TikTok Ads", icon: "🎵", desc: "TikTok for Business" },
-  { key: "taboola", name: "Taboola", icon: "📰", desc: "Native Advertising" },
-  { key: "outbrain", name: "Outbrain", icon: "🌐", desc: "Content Discovery" },
-  { key: "analytics", name: "Google Analytics", icon: "📊", desc: "Web Analytics" },
-  { key: "stripe", name: "Stripe", icon: "💳", desc: "Payment Processing" },
-  { key: "paypal", name: "PayPal", icon: "🌍", desc: "Online Payments" },
-  { key: "kirvano", name: "Kirvano", icon: "🛍", desc: "Plataforma de Infoprodutos" },
-  { key: "kiwify", name: "Kiwify", icon: "⚡", desc: "Checkout Inteligente" },
-  { key: "cakto", name: "Cakto", icon: "🛒", desc: "Plataforma de Vendas" }
+  { key: "meta", name: "Meta Ads", icon: "Me", desc: "Facebook & Instagram Ads" },
+  { key: "google", name: "Google Ads", icon: "Go", desc: "Search & Display" },
+  { key: "tiktok", name: "TikTok Ads", icon: "Tt", desc: "TikTok for Business" },
+  { key: "taboola", name: "Taboola", icon: "Tb", desc: "Native Advertising" },
+  { key: "outbrain", name: "Outbrain", icon: "Ob", desc: "Content Discovery" },
+  { key: "analytics", name: "Google Analytics", icon: "GA", desc: "Web Analytics" },
+  { key: "stripe", name: "Stripe", icon: "St", desc: "Payment Processing" },
+  { key: "paypal", name: "PayPal", icon: "PP", desc: "Online Payments" },
+  { key: "kirvano", name: "Kirvano", icon: "Kr", desc: "Plataforma de Infoprodutos" },
+  { key: "kiwify", name: "Kiwify", icon: "Ki", desc: "Checkout Inteligente" },
+  { key: "cakto", name: "Cakto", icon: "Ca", desc: "Plataforma de Vendas" }
 ];
 function pgIntegrations(mc) {
   mc.innerHTML = '<div class="sh"><div class="stitle">Integrações</div><div class="ssub">Conecte suas ferramentas e plataformas</div></div><div class="g3" id="intGrid"></div>';
@@ -1281,7 +1323,7 @@ function pgIntegrations(mc) {
     const on = S.integrations[it.key];
     const d = document.createElement("div");
     d.className = "intcard";
-    d.innerHTML = '<div class="intinfo"><div class="inticon" style="font-size:20px">' + it.icon + '</div><div><div style="font-size:13px;font-weight:600">' + it.name + '</div><div style="font-size:11px;color:var(--tx3)">' + it.desc + "</div></div></div>" +
+    d.innerHTML = '<div class="intinfo"><div class="mono-chip">' + it.icon + '</div><div><div style="font-size:13px;font-weight:600">' + it.name + '</div><div style="font-size:11px;color:var(--tx3)">' + it.desc + "</div></div></div>" +
       '<div style="display:flex;align-items:center;gap:8px"><span style="font-size:10px;color:' + (on ? "var(--ok)" : "var(--tx3)") + '">' + (on ? "Conectado" : "Desconectado") + '</span><div class="toggle ' + (on ? "on" : "") + '" data-int="' + it.key + '"></div></div>';
     d.querySelector("[data-int]").addEventListener("click", () => toggleInt(it.key));
     g.appendChild(d);
@@ -1299,21 +1341,21 @@ function pgFunnels(mc) {
   mc.innerHTML =
     '<div class="sh flex aic jb"><div><div class="stitle">Funis</div><div class="ssub">Construtor visual de funis de venda — arraste os blocos</div></div>' +
     '<div class="flex gap2"><button class="bp" onclick="openM(\'funnelmod\')">+ Criar Funil</button>' +
-    (S.funnel ? '<button class="bg danger" onclick="clearFunnel()">🗑 Limpar</button>' : "") + "</div></div>" +
+    (S.funnel ? '<button class="bg danger" onclick="clearFunnel()"><i data-lucide="trash-2"></i> Limpar</button>' : "") + "</div></div>" +
     '<div class="fcanvas" id="fcanvas"><svg id="fsvg"></svg><div id="fnodes"></div>' +
-    (S.funnel ? "" : '<div id="fempty" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:var(--tx3)"><div style="font-size:40px;margin-bottom:12px">🌊</div><div class="orb" style="font-size:14px">Crie um funil para começar</div><div style="font-size:12px;margin-top:6px">Clique em "+ Criar Funil" e escolha o nicho</div></div>') + "</div>";
+    (S.funnel ? "" : '<div id="fempty" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:var(--tx3)"><div class="es-ico" style="display:flex;justify-content:center"><i data-lucide="waves"></i></div><div class="orb" style="font-size:14px">Crie um funil para começar</div><div style="font-size:12px;margin-top:6px">Clique em "+ Criar Funil" e escolha o nicho</div></div>') + "</div>";
   renderFunnelNodes();
 }
 const NODE_TYPES = {
-  traffic: { icon: "📡", label: "Tráfego", color: "rgba(0,217,255,0.15)" },
-  landing: { icon: "🖥️", label: "Landing Page", color: "rgba(0,255,136,0.1)" },
-  vsl: { icon: "🎬", label: "VSL", color: "rgba(255,100,0,0.1)" },
-  checkout: { icon: "💳", label: "Checkout", color: "rgba(255,184,0,0.1)" },
-  upsell: { icon: "⬆️", label: "Upsell", color: "rgba(180,0,255,0.1)" },
-  downsell: { icon: "⬇️", label: "Downsell", color: "rgba(255,51,102,0.1)" },
-  whatsapp: { icon: "💬", label: "WhatsApp", color: "rgba(0,200,100,0.15)" },
-  email: { icon: "📧", label: "Email", color: "rgba(0,150,255,0.1)" },
-  product: { icon: "📦", label: "Produto", color: "rgba(255,230,0,0.1)" }
+  traffic: { icon: "radio-tower", label: "Tráfego", color: "rgba(0,217,255,0.15)" },
+  landing: { icon: "monitor", label: "Landing Page", color: "rgba(0,255,136,0.1)" },
+  vsl: { icon: "clapperboard", label: "VSL", color: "rgba(255,100,0,0.1)" },
+  checkout: { icon: "credit-card", label: "Checkout", color: "rgba(255,184,0,0.1)" },
+  upsell: { icon: "arrow-up", label: "Upsell", color: "rgba(180,0,255,0.1)" },
+  downsell: { icon: "arrow-down", label: "Downsell", color: "rgba(255,51,102,0.1)" },
+  whatsapp: { icon: "message-circle", label: "WhatsApp", color: "rgba(0,200,100,0.15)" },
+  email: { icon: "mail", label: "Email", color: "rgba(0,150,255,0.1)" },
+  product: { icon: "package", label: "Produto", color: "rgba(255,230,0,0.1)" }
 };
 function createFunnel(niche) {
   closeM("funnelmod");
@@ -1348,7 +1390,7 @@ function renderFunnelNodes() {
     const div = document.createElement("div");
     div.className = "fnode";
     div.style.cssText = "left:" + n.x + "px;top:" + n.y + "px;background:" + nt.color + ";";
-    div.innerHTML = '<div class="fnicon">' + nt.icon + '</div><div class="fntitle">' + nt.label + '</div><div class="fntype">' + n.type + "</div>";
+    div.innerHTML = '<div class="fnicon"><i data-lucide="' + nt.icon + '"></i></div><div class="fntitle">' + nt.label + '</div><div class="fntype">' + n.type + "</div>";
     div.addEventListener("mousedown", (e) => { fdrag = n; fdragOff = { x: e.clientX - n.x, y: e.clientY - n.y }; div.style.zIndex = 20; e.preventDefault(); });
     nd.appendChild(div);
   });
@@ -1437,7 +1479,7 @@ function pgDatabase(mc) {
     '<div class="gc"><div class="chead"><span class="ctitle">Conectar Projeto Supabase</span></div>' +
     '<div class="fg"><label class="fl">Project URL</label><input class="fi" id="dburl" placeholder="https://xxxx.supabase.co"></div>' +
     '<div class="fg"><label class="fl">Publishable / Anon Key</label><input class="fi" id="dbkey" type="password" placeholder="sb_publishable_... ou eyJhbGciOi..."></div>' +
-    '<div class="flex gap2 je"><button class="bg" id="testDbInputsBtn">🔌 Testar</button><button class="bp" id="saveDbBtn">💾 Salvar & Conectar</button></div>' +
+    '<div class="flex gap2 je"><button class="bg" id="testDbInputsBtn"><i data-lucide="plug"></i> Testar</button><button class="bp" id="saveDbBtn"><i data-lucide="save"></i> Salvar & Conectar</button></div>' +
     '<div class="mt3" style="font-size:11px;color:var(--tx2);line-height:1.7;background:rgba(0,217,255,0.04);border:1px solid var(--bd);border-radius:9px;padding:12px">' +
     "<strong>Como conectar (grátis):</strong><br>1. Crie uma conta em supabase.com<br>2. New Project (plano Free)<br>3. SQL Editor → cole o conteúdo de <span class='mono'>supabase/schema.sql</span> → Run<br>4. Settings → API → copie a <strong>Project URL</strong> (a chave publishable já vem pronta no config.js)<br>5. Cole a URL acima e salve.<br><br>Login por Google: ative em Authentication → Providers." + "</div></div></div>" +
     '<div class="gc mt4"><div class="chead"><span class="ctitle">Como funciona a sincronização</span></div>' +
@@ -1507,9 +1549,9 @@ function pgAdmin(mc) {
   mc.innerHTML =
     '<div class="sh"><div class="stitle">Admin</div><div class="ssub">Controle avançado de usuários e sistema</div></div>' +
     '<div class="g3 ms">' +
-    '<div class="gc"><div class="chead"><span class="ctitle">👥 Usuários</span></div><div class="cval txc">' + S.team.length + '</div><div class="cchg up">Ativos na plataforma</div></div>' +
-    '<div class="gc"><div class="chead"><span class="ctitle">📋 Logs Hoje</span></div><div class="cval">' + logsToday + '</div><div class="cchg">Ações registradas</div></div>' +
-    '<div class="gc"><div class="chead"><span class="ctitle">🔔 Alertas</span></div><div class="cval" style="color:var(--warn)">' + alertsCount + '</div><div class="cchg down">Pendentes revisão</div></div></div>' +
+    '<div class="gc"><div class="chead"><span class="ctitle"><i data-lucide="users"></i>Usuários</span></div><div class="cval txc">' + S.team.length + '</div><div class="cchg up">Ativos na plataforma</div></div>' +
+    '<div class="gc"><div class="chead"><span class="ctitle"><i data-lucide="clipboard-list"></i>Logs Hoje</span></div><div class="cval">' + logsToday + '</div><div class="cchg">Ações registradas</div></div>' +
+    '<div class="gc"><div class="chead"><span class="ctitle"><i data-lucide="bell-ring"></i>Alertas</span></div><div class="cval" style="color:var(--warn)">' + alertsCount + '</div><div class="cchg down">Pendentes revisão</div></div></div>' +
     '<div class="g2 ms">' +
     '<div class="gc tbl-wrap"><div class="chead"><span class="ctitle">Controle de Usuários</span><button class="bp" onclick="openM(\'invmod\')">+ Adicionar</button></div>' +
     '<table class="dtable"><thead><tr><th>Usuário</th><th>Cargo</th><th>Último Acesso</th><th>Status</th></tr></thead><tbody>' +
@@ -1525,6 +1567,7 @@ function renderAudit() {
   const el = $("auditList");
   if (!el) return;
   if (!S.auditLog.length) { el.innerHTML = '<div class="empty-state">Nenhuma ação registrada ainda.</div>'; return; }
+  icons();
   el.innerHTML = S.auditLog.map((l) =>
     '<div style="padding:8px 10px;border-bottom:1px solid rgba(0,217,255,0.06);font-size:11px"><span class="mono txm" style="font-size:9px">' + l.t.slice(11, 19) + '</span> <span style="color:var(--c)">' + esc(l.user) + "</span> — " + esc(l.action) + "</div>"
   ).join("");
@@ -1544,11 +1587,12 @@ function pgRoles(mc) {
     '<button class="bp" onclick="openM(\'rolemod\')">+ Novo Cargo</button></div>' +
     '<div class="g3">' + S.roles.map((r, i) =>
       '<div class="gc"><div class="chead"><span class="orb" style="font-size:13px;font-weight:700;color:' + colors[i % colors.length] + '">' + esc(r.name) + "</span>" +
-      '<div class="flex gap1"><button class="bg danger" data-roledel="' + r.id + '" style="font-size:10px;padding:3px 8px">🗑</button></div></div>' +
+      '<div class="flex gap1"><button class="bg danger" data-roledel="' + r.id + '" style="font-size:10px;padding:3px 8px"><i data-lucide="trash-2"></i></button></div></div>' +
       '<div style="font-size:11px;color:var(--tx2);margin-bottom:10px">Permissões (' + r.perms.length + "):</div>" +
       r.perms.map((p) => '<div style="padding:5px 8px;background:rgba(0,217,255,0.04);border:1px solid var(--bd);border-radius:5px;font-size:11px;margin-bottom:4px">✓ ' + esc(p) + "</div>").join("") + "</div>"
     ).join("") + "</div>";
   mc.querySelectorAll("[data-roledel]").forEach((b) => b.addEventListener("click", () => delRole(Number(b.dataset.roledel))));
+  icons();
 }
 function addRole() {
   const n = $("rln").value.trim();
@@ -1574,22 +1618,22 @@ function computeAlerts() {
   const out = [];
   const fm = finMetrics();
   const goalPct = (fm.income / (S.revenueTarget || 1)) * 100;
-  if (goalPct < 100) out.push({ icon: "🎯", msg: "Meta em " + goalPct.toFixed(1) + "% — faltam " + fmtBRL(Math.max(S.revenueTarget - fm.income, 0)) });
-  else out.push({ icon: "🎉", msg: "Meta batida! Receita acumulada de " + fmtBRL(fm.income) });
+  if (goalPct < 100) out.push({ icon: "target", msg: "Meta em " + goalPct.toFixed(1) + "% — faltam " + fmtBRL(Math.max(S.revenueTarget - fm.income, 0)) });
+  else out.push({ icon: "sparkles", msg: "Meta batida! Receita acumulada de " + fmtBRL(fm.income) });
   const overdue = [];
   ["todo", "doing"].forEach((c) => (S.tasks[c] || []).forEach((t) => { if (t.due && daysDiff(t.due) < 0) overdue.push(t.title); }));
-  if (overdue.length) out.push({ icon: "⏰", msg: overdue.length + " tarefa(s) atrasada(s): " + overdue.slice(0, 2).join(", ") });
+  if (overdue.length) out.push({ icon: "alarm-clock", msg: overdue.length + " tarefa(s) atrasada(s): " + overdue.slice(0, 2).join(", ") });
   const pend = (S.salesHistory || []).filter((s) => s.status === "Pendente").length;
-  if (pend) out.push({ icon: "🧾", msg: pend + " pagamento(s) pendente(s) de confirmação" });
+  if (pend) out.push({ icon: "receipt-text", msg: pend + " pagamento(s) pendente(s) de confirmação" });
   const bestCamp = [...S.campaigns].sort((a, b) => b.roi - a.roi)[0];
-  if (bestCamp && bestCamp.roi > 0) out.push({ icon: "📢", msg: "Campanha \"" + bestCamp.name + "\" com ROI de " + bestCamp.roi + "%" });
+  if (bestCamp && bestCamp.roi > 0) out.push({ icon: "megaphone", msg: "Campanha \"" + bestCamp.name + "\" com ROI de " + bestCamp.roi + "%" });
   return out;
 }
 function computeNotifs() {
   const list = computeAlerts().map((a) => ({ icon: a.icon, msg: a.msg, key: a.msg }));
   (S.events || []).forEach((e) => {
     const dd = daysDiff(e.date);
-    if (dd !== null && dd >= 0 && dd <= 7) list.push({ icon: "📅", msg: e.title + " — " + (dd === 0 ? "hoje" : "em " + dd + " dia(s)"), key: "ev" + e.id });
+    if (dd !== null && dd >= 0 && dd <= 7) list.push({ icon: "calendar-days", msg: e.title + " — " + (dd === 0 ? "hoje" : "em " + dd + " dia(s)"), key: "ev" + e.id });
   });
   return list;
 }
@@ -1601,7 +1645,8 @@ function refreshNotifs() {
   const unseen = items.filter((i) => !seen || String(seen) < i.key);
   badge.classList.toggle("on", items.length > 0 && unseen.length > 0);
   const listEl = $("notiflist");
-  if (listEl) listEl.innerHTML = items.map((i) => '<div class="npitem"><span>' + i.icon + "</span><span>" + esc(i.msg) + "</span></div>").join("") || '<div class="npitem">Nada por aqui. 🎉</div>';
+  if (listEl) icons();
+  listEl.innerHTML = items.map((i) => '<div class="npitem"><span class="np-ico"><i data-lucide="' + i.icon + '"></i></span><span>' + esc(i.msg) + "</span></div>").join("") || '<div class="npitem">Nada por aqui.</div>';
 }
 document.addEventListener("click", (e) => {
   const bell = $("notifbell");
@@ -1625,12 +1670,12 @@ function markAllSeen(ev) {
 // ===== BUSCA GLOBAL =====
 function searchIndex() {
   const idx = [];
-  Object.keys(PAGE_TITLES).forEach((p) => idx.push({ type: "Página", icon: "📄", label: PAGE_TITLES[p], page: p }));
-  ["todo", "doing", "done"].forEach((c) => (S.tasks[c] || []).forEach((t) => idx.push({ type: "Tarefa", icon: "✅", label: t.title, page: "tasks" })));
-  S.products.forEach((p) => idx.push({ type: "Produto", icon: "📦", label: p.name, page: "products" }));
-  S.campaigns.forEach((c) => idx.push({ type: "Campanha", icon: "🎯", label: c.name, page: "campaigns" }));
-  S.team.forEach((m) => idx.push({ type: "Membro", icon: "👤", label: m.name + " (" + m.email + ")", page: "team" }));
-  (S.events || []).forEach((e) => idx.push({ type: "Evento", icon: "📅", label: e.title + " — " + e.date, page: "planning" }));
+  Object.keys(PAGE_TITLES).forEach((p) => idx.push({ type: "Página", icon: "file-text", label: PAGE_TITLES[p], page: p }));
+  ["todo", "doing", "done"].forEach((c) => (S.tasks[c] || []).forEach((t) => idx.push({ type: "Tarefa", icon: "list-checks", label: t.title, page: "tasks" })));
+  S.products.forEach((p) => idx.push({ type: "Produto", icon: "package", label: p.name, page: "products" }));
+  S.campaigns.forEach((c) => idx.push({ type: "Campanha", icon: "target", label: c.name, page: "campaigns" }));
+  S.team.forEach((m) => idx.push({ type: "Membro", icon: "user", label: m.name + " (" + m.email + ")", page: "team" }));
+  (S.events || []).forEach((e) => idx.push({ type: "Evento", icon: "calendar-days", label: e.title + " — " + e.date, page: "planning" }));
   return idx;
 }
 const gs = document.getElementById("gsearch");
@@ -1641,9 +1686,10 @@ if (gs) {
     if (!q) { box.classList.remove("open"); return; }
     const hits = searchIndex().filter((i) => i.label.toLowerCase().indexOf(q) >= 0).slice(0, 12);
     box.innerHTML = hits.length
-      ? hits.map((h) => '<div class="gres" data-go="' + h.page + '"><span class="gres-ico">' + h.icon + "</span><span>" + esc(h.label) + '</span><span class="gres-type">' + h.type + "</span></div>").join("")
+      ? hits.map((h) => '<div class="gres" data-go="' + h.page + '"><span class="gres-ico"><i data-lucide="' + h.icon + '"></i></span><span>' + esc(h.label) + '</span><span class="gres-type">' + h.type + "</span></div>").join("")
       : '<div class="gres">Nenhum resultado para "' + esc(q) + '"</div>';
     box.classList.add("open");
+    icons();
     box.querySelectorAll("[data-go]").forEach((el) => el.addEventListener("click", () => goResult(el.dataset.go)));
   });
   gs.addEventListener("keydown", function (e) {
@@ -1813,3 +1859,4 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+icons();
