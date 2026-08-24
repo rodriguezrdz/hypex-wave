@@ -152,6 +152,42 @@ function audit(action) {
   if (S.auditLog.length > 80) S.auditLog.length = 80;
 }
 
+// ===== EMAILJS =====
+let emailjsReady = false;
+function getEmailJSCfg() {
+  const w = window.EMAILJS_CONFIG || {};
+  if (w.serviceId && w.templateId && w.publicKey) return w;
+  return null;
+}
+function ensureEmailJS() {
+  return new Promise((res, rej) => {
+    if (window.emailjs && window.emailjs.send) return res();
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js";
+    s.onload = () => res();
+    s.onerror = () => rej(new Error("Falha ao carregar SDK do EmailJS"));
+    document.head.appendChild(s);
+  });
+}
+async function emailSend(toEmail, toName, message) {
+  const cfg = getEmailJSCfg();
+  if (!cfg) return { ok: false, reason: "not-configured" };
+  await ensureEmailJS();
+  try {
+    if (!emailjsReady) { window.emailjs.init({ publicKey: cfg.publicKey }); emailjsReady = true; }
+    await window.emailjs.send(cfg.serviceId, cfg.templateId, {
+      to_email: toEmail,
+      to_name: toName,
+      subject: "HYPEX WAVE — Você recebeu um convite",
+      message
+    });
+    return { ok: true };
+  } catch (e) {
+    console.warn("emailSend", e);
+    return { ok: false, reason: e.message || "send-failed" };
+  }
+}
+
 // ===== TOUCH (mutação -> salvar local + nuvem) =====
 function touch(skipCloud) {
   saveLocalDebounced();
@@ -297,7 +333,10 @@ async function doLogin() {
         if (error) throw error;
         if (!data.session) {
           btn.disabled = false;
-          return lerr("Conta criada! Confirme seu email antes de entrar.");
+          if (getEmailJSCfg()) {
+            emailSend(em, nm, "Olá " + nm + "! Sua conta na HYPEX WAVE foi criada. Confirme seu email pelo link que o Supabase enviou e depois faça login em https://rodriguezrdz.github.io/hypex-wave/");
+          }
+          return lerr("Conta criada! Confirme seu email antes de entrar." + (getEmailJSCfg() ? " Enviamos uma cópia por EmailJS." : ""));
         }
         await onCloudSession(data.session, data.user);
         return;
@@ -1055,6 +1094,12 @@ function sendInvite() {
   logAndTouch("Membro adicionado: " + nm + " (" + role + ")");
   pgTeam($("mc"));
   showToast("✉ " + nm + " adicionado à equipe!", "ok");
+  if (getEmailJSCfg()) {
+    const r = await emailSend(em, nm,
+      "Olá " + nm + "! Você foi convidado para a plataforma HYPEX WAVE como " + role +
+      ". Acesse: https://rodriguezrdz.github.io/hypex-wave/ e crie sua conta com o email " + em + ".");
+    showToast(r.ok ? "📧 Convite enviado por email para " + em : "⚠ Membro salvo, mas o email falhou (" + r.reason + ")", r.ok ? "ok" : "warn");
+  }
 }
 function removeMember(id) {
   const m = S.team.find((x) => x.id === id);
