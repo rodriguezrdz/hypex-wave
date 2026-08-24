@@ -158,8 +158,7 @@ function getEmailJSCfg() {
   const w = window.EMAILJS_CONFIG || {};
   if (w.serviceId && w.templateId && w.publicKey) return w;
   return null;
-}
-function ensureEmailJS() {
+}function ensureEmailJS() {
   return new Promise((res, rej) => {
     if (window.emailjs && window.emailjs.send) return res();
     const s = document.createElement("script");
@@ -175,12 +174,13 @@ async function emailSend(toEmail, toName, message) {
   await ensureEmailJS();
   try {
     if (!emailjsReady) { window.emailjs.init({ publicKey: cfg.publicKey }); emailjsReady = true; }
+    const opts = cfg.privateKey ? { publicKey: cfg.publicKey, privateKey: cfg.privateKey } : undefined;
     await window.emailjs.send(cfg.serviceId, cfg.templateId, {
       to_email: toEmail,
       to_name: toName,
       subject: "HYPEX WAVE — Você recebeu um convite",
       message
-    });
+    }, opts);
     return { ok: true };
   } catch (e) {
     console.warn("emailSend", e);

@@ -28,5 +28,6 @@ window.ANTHROPIC_KEY = null;
 window.EMAILJS_CONFIG = {
   serviceId: "service_nv9gtys",
   templateId: "template_lswuq9t",
-  publicKey: "zmbOowik9I7A2nGfl"
+  publicKey: "zmbOowik9I7A2nGfl",
+  privateKey: "9kFlsQ0F8YWLOfq59Vu9P"
 };
