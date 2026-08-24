@@ -1,24 +1,24 @@
 // ============================================================
 // HYPEX WAVE — config.js
 // ============================================================
-// OPÇÃO 1 (recomendada para produção): preencha abaixo com as
-// credenciais do seu projeto Supabase e faça novo deploy.
+// ✅ CHAVE JÁ CONFIGURADA (publishable key — segura para frontend).
 //
-//   Dashboard > Settings > API:
-//     - Project URL  -> url
-//     - anon public  -> key
+// ⚠ FALTA SÓ 1 COISA: a Project URL do seu Supabase.
+//   Onde pegar: painel do Supabase → Settings → API → "Project URL"
+//   (parece: https://abcdefghijklmnop.supabase.co)
 //
-// OPÇÃO 2: deixe como está (null) e configure DENTRO do app,
-//   em Banco de Dados > Conectar Supabase. Fica salvo no navegador.
+// Cole abaixo entre as aspas de url, salve, commit e push — pronto.
 //
-// Se nenhum dos dois estiver configurado, o app roda em
-// MODO LOCAL (dados salvos apenas neste navegador).
+// Alternativa sem editar código: abra o app → menu Banco de Dados →
+// cole a URL no campo (a chave já vem preenchida) → Salvar & Conectar.
+//
+// 🔒 NUNCA coloque aqui a sb_secret_... — ela é só para servidores.
 // ============================================================
 window.SUPABASE_CONFIG = {
-  url: null,   // ex: "https://xxxxxxxxxxxx.supabase.co"
-  key: null    // ex: "eyJhbGciOiJI..." (anon public)
+  url: null,
+  key: "sb_publishable_HgmhuAwT0YpppvjdR9IQeg_KWtJQ6c4"
 };
 
 // OPCIONAL — HYPEX AI com Claude (Anthropic).
 // Sem chave, a IA local analítica responde usando os dados reais da plataforma.
-window.ANTHROPIC_KEY = null; // ex: "sk-ant-..."
+window.ANTHROPIC_KEY = null;

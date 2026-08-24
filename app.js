@@ -256,7 +256,8 @@ function loginInfoText() {
     $("lmodebadge").className = "lmodebadge lmode-local";
     $("lmodebadge").textContent = "MODO LOCAL";
     $("linfo").style.display = "block";
-    $("linfo").innerHTML = "<strong>Contas de acesso:</strong><br>rodriguez.founder@gmail.com · admin@hypexwave.com · owner@hypexwave.com<br>Senha: qualquer, com 4+ caracteres.";
+    $("linfo").innerHTML = "<strong>Contas de acesso:</strong><br>rodriguez.founder@gmail.com · admin@hypexwave.com · owner@hypexwave.com<br>Senha: qualquer, com 4+ caracteres." +
+      (((window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.key) && !cfg) ? "<br><br>🔑 Chave do Supabase já configurada — falta só a <strong>Project URL</strong>. Entre e abra o menu <strong>Banco de Dados</strong> para colar." : "");
     $("lnamefield").style.display = "none";
     $("lforgot").style.display = "none";
     $("ltogglemode").textContent = "Conectar banco de dados";
@@ -1383,29 +1384,41 @@ function pgDatabase(mc) {
     '<div class="gc"><div class="chead"><span class="ctitle">Status da Conexão</span><span class="' + (cfg ? "bok" : "bwarn") + ' b">' + (cfg ? "Conectado" : "Modo Local") + "</span></div>" +
     '<div style="font-size:12px;line-height:2">' +
     "URL: <span class='mono txs'>" + (cfg ? esc(cfg.url) : "—") + "</span><br>" +
-    "Anon Key: <span class='mono txs'>" + (cfg ? maskKey(cfg.key) : "—") + "</span><br>" +
+    "API Key: <span class='mono txs'>" + (cfg ? maskKey(cfg.key) : ((window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.key) ? maskKey(window.SUPABASE_CONFIG.key) + " (config.js)" : "—")) + "</span><br>" +
     "Usuário: <span class='mono txs'>" + esc((S.user && S.user.email) || "—") + "</span></div>" +
     '<div class="mt3 flex gap2">' +
     '<button class="bg" id="testDbBtn"' + (cfg ? "" : " disabled style=\"opacity:.5\"") + ">Testar conexão</button>" +
     (cfg ? '<button class="bg danger" id="clearDbBtn">Desconectar banco</button>' : "") + "</div></div>" +
     '<div class="gc"><div class="chead"><span class="ctitle">Conectar Projeto Supabase</span></div>' +
     '<div class="fg"><label class="fl">Project URL</label><input class="fi" id="dburl" placeholder="https://xxxx.supabase.co"></div>' +
-    '<div class="fg"><label class="fl">Anon Public Key</label><input class="fi" id="dbkey" type="password" placeholder="eyJhbGciOi..."></div>' +
+    '<div class="fg"><label class="fl">Publishable / Anon Key</label><input class="fi" id="dbkey" type="password" placeholder="sb_publishable_... ou eyJhbGciOi..."></div>' +
     '<div class="flex gap2 je"><button class="bg" id="testDbInputsBtn">🔌 Testar</button><button class="bp" id="saveDbBtn">💾 Salvar & Conectar</button></div>' +
     '<div class="mt3" style="font-size:11px;color:var(--tx2);line-height:1.7;background:rgba(0,217,255,0.04);border:1px solid var(--bd);border-radius:9px;padding:12px">' +
-    "<strong>Como obter (grátis):</strong><br>1. Crie uma conta em supabase.com<br>2. New Project (plano Free)<br>3. SQL Editor → cole o conteúdo de <span class='mono'>supabase/schema.sql</span> → Run<br>4. Settings → API → copie URL e anon key<br>5. Cole aqui e salve.<br><br>Login por Google: ative em Authentication → Providers." + "</div></div></div>" +
+    "<strong>Como conectar (grátis):</strong><br>1. Crie uma conta em supabase.com<br>2. New Project (plano Free)<br>3. SQL Editor → cole o conteúdo de <span class='mono'>supabase/schema.sql</span> → Run<br>4. Settings → API → copie a <strong>Project URL</strong> (a chave publishable já vem pronta no config.js)<br>5. Cole a URL acima e salve.<br><br>Login por Google: ative em Authentication → Providers." + "</div></div></div>" +
     '<div class="gc mt4"><div class="chead"><span class="ctitle">Como funciona a sincronização</span></div>' +
     '<div style="font-size:12px;color:var(--tx2);line-height:1.9">• Sem banco: tudo é salvo neste navegador (localStorage) — nada se perde ao recarregar.<br>• Com banco: cada usuário tem seus dados isolados por RLS (Row Level Security) e sincronizados automaticamente.<br>• O indicador no topo mostra o estado da sincronização em tempo real.</div></div>';
   $("testDbInputsBtn").addEventListener("click", testDbInputs);
   $("testDbBtn").addEventListener("click", testDbConnection);
   if ($("clearDbBtn")) $("clearDbBtn").addEventListener("click", clearDbConfig);
   $("saveDbBtn").addEventListener("click", saveDbConfig);
-  if (cfg) $("dburl").value = cfg.url;
+  const wcfg = window.SUPABASE_CONFIG || {};
+  const preUrl = (cfg && cfg.url) || wcfg.url || "";
+  if (preUrl) $("dburl").value = preUrl;
+  if (!cfg && wcfg.key) $("dbkey").value = wcfg.key;
+}
+
+function resolveDbKey() {
+  const typed = $("dbkey").value.trim();
+  if (typed) return typed;
+  const existing = getCfg();
+  if (existing && existing.key) return existing.key;
+  const w = window.SUPABASE_CONFIG || {};
+  return w.key || "";
 }
 async function testDbInputs() {
   const url = $("dburl").value.trim().replace(/\/$/, "");
-  const key = $("dbkey").value.trim();
-  if (!url || !key) return showToast("Preencha URL e chave", "warn");
+  const key = resolveDbKey();
+  if (!url || !key) return showToast("Preencha a Project URL (a chave já vem configurada)", "warn");
   pingSupabase(url, key);
 }
 async function testDbConnection() {
@@ -1425,8 +1438,8 @@ async function pingSupabase(url, key) {
 }
 function saveDbConfig() {
   const url = $("dburl").value.trim().replace(/\/$/, "");
-  const key = $("dbkey").value.trim();
-  if (url.indexOf("https://") !== 0 || !key) return showToast("URL deve começar com https:// e a chave é obrigatória", "err");
+  const key = resolveDbKey();
+  if (url.indexOf("https://") !== 0 || !key) return showToast("Informe a Project URL válida (https://...)", "err");
   localStorage.setItem(LS_SBCFG, JSON.stringify({ url, key }));
   audit("Supabase configurado: " + url);
   saveLocal();
