@@ -26,7 +26,7 @@ window.ANTHROPIC_KEY = null;
 // 5. Cole os três abaixo e faça commit+push.
 // ============================================================
 window.EMAILJS_CONFIG = {
-  serviceId: null,   // ex: "service_xxxxxxx"
-  templateId: null,  // ex: "template_xxxxxxx"
-  publicKey: null    // ex: "xxxxxxxxxxxxx"
+  serviceId: "service_nv9gtys",
+  templateId: "template_6y7wd08",
+  publicKey: "zmbOowik9I7A2nGfl"
 };
