@@ -1,0 +1,9 @@
+{
+  "name": "hypex-wave",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HYPEX WAVE — Plataforma SaaS Empresarial Premium (static app + Supabase)",
+  "scripts": {
+    "start": "npx --yes serve . -l 3000"
+  }
+}

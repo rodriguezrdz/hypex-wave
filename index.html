@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HYPEX WAVE — Plataforma SaaS Empresarial</title>
+<meta name="description" content="HYPEX WAVE — plataforma de gestão para negócios digitais: financeiro, produtos, campanhas, equipe e funis em um só lugar.">
+<meta name="theme-color" content="#050505">
+<meta property="og:title" content="HYPEX WAVE">
+<meta property="og:description" content="Plataforma SaaS Empresarial Premium — financeiro, produtos, campanhas e equipe.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/logo.jpg">
+<link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+<link rel="apple-touch-icon" href="assets/logo.jpg">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ==================== LOGIN ==================== -->
+<div id="ls">
+  <div class="lcard">
+    <div class="llogobox"><img src="assets/logo.jpg" alt="HYPEX WAVE"></div>
+    <div class="ltitle">HYPEX WAVE</div>
+    <div class="lsub">Plataforma SaaS Empresarial Premium</div>
+    <div class="lmode"><span class="lmodebadge lmode-local" id="lmodebadge">MODO LOCAL</span></div>
+    <div class="lerr" id="lerr">✖ Email ou senha inválidos.</div>
+    <div class="linfo" id="linfo"></div>
+    <!-- signup name field (cloud mode only) -->
+    <div class="lfield" id="lnamefield" style="display:none"><label>Seu nome</label><input type="text" id="lname" placeholder="Como quer ser chamado?"></div>
+    <div class="lfield"><label>Email</label><input type="email" id="lemail" placeholder="seu@email.com" autocomplete="username"></div>
+    <div class="lfield"><label>Senha</label><input type="password" id="lpwd" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="lbtn" id="lbtn" onclick="doLogin()">⚡ ENTRAR NA PLATAFORMA</button>
+    <div class="ldiv">ou</div>
+    <button class="lgbtn" onclick="doGLogin()">
+      <svg width="17" height="17" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.3z"/></svg>
+      Continuar com Google
+    </button>
+    <div class="lrow">
+      <a id="ltogglemode" onclick="toggleSignup()">Criar conta</a>
+      <a id="lforgot" onclick="doResetPwd()" style="display:none">Esqueci minha senha</a>
+    </div>
+    <div class="lnote" id="lnote">⚠ Modo local — dados salvos apenas neste navegador</div>
+  </div>
+</div>
+
+<!-- ==================== APP ==================== -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <aside id="sb">
+    <div class="sbh">
+      <img class="sbli" src="assets/logo.jpg" alt="HYPEX WAVE">
+      <div class="sbb">HYPEX WAVE<span>Business Platform</span></div>
+    </div>
+    <div class="rvc" onclick="navTo('financial')">
+      <div class="rvch">
+        <img class="rvwi" src="assets/logo.jpg" alt="">
+        <div class="rvl">Faturamento Total</div>
+      </div>
+      <div class="rva" id="rvtotal">R$ 0,00</div>
+      <div class="rvr" id="rvmeta">Meta: R$ 0,00 → R$ 100.000,00</div>
+      <div class="rvbar"><div class="rvbf" id="rvbf"></div></div>
+    </div>
+    <nav class="sbn">
+      <div class="ncat">Principal</div>
+      <div class="ni active" data-page="dashboard" onclick="nav(this,'dashboard')"><span class="nic">📊</span> Dashboard</div>
+      <div class="ni" data-page="tasks" onclick="nav(this,'tasks')"><span class="nic">✅</span> Tarefas</div>
+      <div class="ni" data-page="planning" onclick="nav(this,'planning')"><span class="nic">📅</span> Planejamento</div>
+      <div class="ncat">Digital</div>
+      <div class="ni" data-page="products" onclick="nav(this,'products')"><span class="nic">📦</span> Produtos</div>
+      <div class="ni" data-page="vitrine" onclick="nav(this,'vitrine')"><span class="nic">🏪</span> Vitrine</div>
+      <div class="ni" data-page="sales" onclick="nav(this,'sales')"><span class="nic">💰</span> Minhas Vendas</div>
+      <div class="ncat">Empresarial</div>
+      <div class="ni" data-page="financial" onclick="nav(this,'financial')"><span class="nic">💳</span> Financeiro</div>
+      <div class="ni" data-page="team" onclick="nav(this,'team')"><span class="nic">👥</span> Equipe</div>
+      <div class="ni" data-page="individual" onclick="nav(this,'individual')"><span class="nic">📈</span> Relatório Individual</div>
+      <div class="ncat">Marketing</div>
+      <div class="ni" data-page="ads" onclick="nav(this,'ads')"><span class="nic">📢</span> Anúncios</div>
+      <div class="ni" data-page="campaigns" onclick="nav(this,'campaigns')"><span class="nic">🎯</span> Campanhas</div>
+      <div class="ni" data-page="integrations" onclick="nav(this,'integrations')"><span class="nic">🔗</span> Integrações</div>
+      <div class="ni" data-page="funnels" onclick="nav(this,'funnels')"><span class="nic">🌊</span> Funis</div>
+      <div class="ncat">Sistema</div>
+      <div class="ni" data-page="appearance" onclick="nav(this,'appearance')"><span class="nic">🎨</span> Aparência</div>
+      <div class="ni" data-page="database" onclick="nav(this,'database')"><span class="nic">🗄️</span> Banco de Dados</div>
+      <div class="ni" data-page="admin" onclick="nav(this,'admin')"><span class="nic">🔐</span> Admin</div>
+      <div class="ni" data-page="roles" onclick="nav(this,'roles')"><span class="nic">👔</span> Cargos</div>
+    </nav>
+    <div class="sbf">
+      <div class="ucard" onclick="navTo('admin')">
+        <div class="uav" id="uav">N</div>
+        <div><div class="uname" id="uname">—</div><div class="urole" id="urole">DONO</div></div>
+        <div style="margin-left:auto;color:var(--tx3);font-size:11px">⚙</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- BACKDROP MOBILE -->
+  <div class="sb-backdrop" id="sbBackdrop" onclick="closeSidebar()"></div>
+
+  <!-- TOPBAR -->
+  <div id="tb">
+    <div id="mobile-hamburger" onclick="toggleSidebar()">☰</div>
+    <div class="tbtitle" id="tbtitle">Dashboard</div>
+    <span id="syncpill" class="local tbsearch-mobile-hide" title="Status da sincronização"><span class="sdot"></span><span id="synclabel">Local</span></span>
+    <div class="tbsearch">
+      <span style="color:var(--tx3);font-size:13px">🔍</span>
+      <input placeholder="Busca global... (Ctrl+K)" id="gsearch" autocomplete="off">
+      <div id="gresults"></div>
+    </div>
+    <div class="tbas">
+      <div class="tbbtn" id="notifbell" title="Notificações">🔔<div class="nbadge" id="notifbadge"></div>
+        <div id="notifpanel">
+          <div class="nph"><span class="npt">Notificações</span><span class="npmark" onclick="markAllSeen(event)">marcar lidas</span></div>
+          <div id="notiflist"></div>
+        </div>
+      </div>
+      <div class="tbbtn" onclick="toggleAI()" title="HYPEX AI">🤖</div>
+      <div class="tbbtn" onclick="doLogout()" title="Sair">⏻</div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main id="mc"></main>
+
+  <!-- AI ORB -->
+  <div id="aiorb" onclick="toggleAI()">
+    <img src="assets/ai-orb.jpg" alt="HYPEX AI">
+    <div class="ailab">HYPEX AI</div>
+  </div>
+
+  <!-- AI MODAL -->
+  <div id="aimod">
+    <div class="aimh">
+      <img class="aimli" src="assets/ai-orb.jpg" alt="">
+      <div class="aimtitle">HYPEX AI</div>
+      <div class="aist"><div class="aistd"></div>Online</div>
+      <div onclick="toggleAI()" style="cursor:pointer;color:var(--tx3);font-size:13px;margin-left:7px">✕</div>
+    </div>
+    <div class="aimsgs" id="aimsgs">
+      <div class="aimsg bot">👋 Olá! Sou a HYPEX AI, sua analista de negócios. Pergunte sobre faturamento, metas, campanhas, produtos ou equipe — ou peça "criar tarefa ..." que eu faço pra você.</div>
+    </div>
+    <div class="aiin">
+      <input class="aiinput" id="aiinput" placeholder="Pergunte à HYPEX AI..." onkeydown="if(event.key==='Enter')sendAI()">
+      <button class="aisend" onclick="sendAI()">➤</button>
+    </div>
+  </div>
+
+  <!-- TASK MODAL -->
+  <div class="moverlay" id="taskmod">
+    <div class="mbox">
+      <div class="mtitle">Nova Tarefa</div>
+      <div class="mclose" onclick="closeM('taskmod')">✕</div>
+      <div class="fg"><label class="fl">Título</label><input class="fi" id="ti" placeholder="Nome da tarefa..." onkeydown="if(event.key==='Enter')addTask()"></div>
+      <div class="fg"><label class="fl">Prioridade</label><select class="fi" id="tpri"><option value="high">🔴 Alta</option><option value="med">🟡 Média</option><option value="low">🟢 Baixa</option></select></div>
+      <div class="fg"><label class="fl">Prazo</label><input class="fi" type="date" id="tdue"></div>
+      <div class="fg"><label class="fl">Responsável</label><input class="fi" id="tass" placeholder="Nome..."></div>
+      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('taskmod')">Cancelar</button><button class="bp" onclick="addTask()">✅ Criar Tarefa</button></div>
+    </div>
+  </div>
+
+  <!-- EVENT MODAL -->
+  <div class="moverlay" id="evtmod">
+    <div class="mbox">
+      <div class="mtitle">Novo Evento</div>
+      <div class="mclose" onclick="closeM('evtmod')">✕</div>
+      <div class="fg"><label class="fl">Título</label><input class="fi" id="eti" placeholder="Nome do evento..." onkeydown="if(event.key==='Enter')addEvent()"></div>
+      <div class="fg"><label class="fl">Data</label><input class="fi" type="date" id="edate"></div>
+      <div class="fg"><label class="fl">Categoria</label><select class="fi" id="ecat"><option value="meet">🔵 Reunião</option><option value="launch">🟢 Lançamento</option><option value="dead">🔴 Prazo</option><option value="pers">🟡 Pessoal</option></select></div>
+      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('evtmod')">Cancelar</button><button class="bp" onclick="addEvent()">📅 Adicionar</button></div>
+    </div>
+  </div>
+
+  <!-- PRODUCT MODAL -->
+  <div class="moverlay" id="prodmod">
+    <div class="mbox">
+      <div class="mtitle">Novo Produto</div>
+      <div class="mclose" onclick="closeM('prodmod')">✕</div>
+      <div class="fg"><label class="fl">Nome</label><input class="fi" id="pni" placeholder="Nome do produto..." onkeydown="if(event.key==='Enter')addProduct()"></div>
+      <div class="fg"><label class="fl">Nicho</label><input class="fi" id="pniche" placeholder="Ex: Emagrecimento..."></div>
+      <div class="fg"><label class="fl">Preço (R$)</label><input class="fi" type="number" step="0.01" min="0" id="pprice" placeholder="0,00"></div>
+      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('prodmod')">Cancelar</button><button class="bp" onclick="addProduct()">📦 Adicionar</button></div>
+    </div>
+  </div>
+
+  <!-- CAMPAIGN MODAL -->
+  <div class="moverlay" id="campmod">
+    <div class="mbox">
+      <div class="mtitle">Nova Campanha</div>
+      <div class="mclose" onclick="closeM('campmod')">✕</div>
+      <div class="fg"><label class="fl">Nome da Campanha</label><input class="fi" id="cni" placeholder="Nome..." onkeydown="if(event.key==='Enter')addCampaign()"></div>
+      <div class="fg"><label class="fl">Plataforma</label><select class="fi" id="cplt"><option>Meta Ads</option><option>Google Ads</option><option>TikTok Ads</option><option>Taboola</option><option>Outbrain</option></select></div>
+      <div class="fg"><label class="fl">Orçamento (R$)</label><input class="fi" type="number" step="0.01" min="0" id="cbud" placeholder="0,00"></div>
+      <div class="fg"><label class="fl">Status</label><select class="fi" id="cst"><option>Ativa</option><option>Pausada</option><option>Finalizada</option></select></div>
+      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('campmod')">Cancelar</button><button class="bp" onclick="addCampaign()">🎯 Criar</button></div>
+    </div>
+  </div>
+
+  <!-- TEAM INVITE MODAL -->
+  <div class="moverlay" id="invmod">
+    <div class="mbox">
+      <div class="mtitle">Adicionar Membro</div>
+      <div class="mclose" onclick="closeM('invmod')">✕</div>
+      <div class="fg"><label class="fl">Nome</label><input class="fi" id="iname" placeholder="Nome do membro..."></div>
+      <div class="fg"><label class="fl">Email</label><input class="fi" id="imail" placeholder="email@empresa.com" onkeydown="if(event.key==='Enter')sendInvite()"></div>
+      <div class="fg"><label class="fl">Cargo</label><select class="fi" id="irole"><option>Colaborador</option><option>Gerente</option><option>Administrador</option><option>Sócio</option></select></div>
+      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('invmod')">Cancelar</button><button class="bp" onclick="sendInvite()">✉ Adicionar</button></div>
+    </div>
+  </div>
+
+  <!-- FUNNEL MODAL -->
+  <div class="moverlay" id="funnelmod">
+    <div class="mbox">
+      <div class="mtitle">Criar Funil</div>
+      <div class="mclose" onclick="closeM('funnelmod')">✕</div>
+      <p style="font-size:12px;color:var(--tx2);margin-bottom:16px">Escolha o nicho para gerar o mapa visual do funil:</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px" id="nicheGrid">
+        <div class="nicheopt" onclick="createFunnel('Emagrecimento')" style="padding:14px;background:rgba(0,217,255,0.06);border:1px solid var(--bd);border-radius:9px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--c)'" onmouseout="this.style.borderColor='var(--bd)'">🏃 Emagrecimento</div>
+        <div class="nicheopt" onclick="createFunnel('Relacionamento')" style="padding:14px;background:rgba(0,217,255,0.06);border:1px solid var(--bd);border-radius:9px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--c)'" onmouseout="this.style.borderColor='var(--bd)'">💑 Relacionamento</div>
+        <div class="nicheopt" onclick="createFunnel('Finanças')" style="padding:14px;background:rgba(0,217,255,0.06);border:1px solid var(--bd);border-radius:9px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--c)'" onmouseout="this.style.borderColor='var(--bd)'">💰 Finanças</div>
+        <div class="nicheopt" onclick="createFunnel('Saúde')" style="padding:14px;background:rgba(0,217,255,0.06);border:1px solid var(--bd);border-radius:9px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--c)'" onmouseout="this.style.borderColor='var(--bd)'">🏥 Saúde</div>
+        <div class="nicheopt" onclick="createFunnel('E-commerce')" style="padding:14px;background:rgba(0,217,255,0.06);border:1px solid var(--bd);border-radius:9px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--c)'" onmouseout="this.style.borderColor='var(--bd)'">🛒 E-commerce</div>
+        <div class="nicheopt" onclick="createFunnel('Outros')" style="padding:14px;background:rgba(0,217,255,0.06);border:1px solid var(--bd);border-radius:9px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--c)'" onmouseout="this.style.borderColor='var(--bd)'">⭐ Outros</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSACTION MODAL (NOVO) -->
+  <div class="moverlay" id="transmod">
+    <div class="mbox">
+      <div class="mtitle">Novo Lançamento</div>
+      <div class="mclose" onclick="closeM('transmod')">✕</div>
+      <div class="fg"><label class="fl">Descrição</label><input class="fi" id="trd" placeholder="Ex: Venda HYPEX Method..." onkeydown="if(event.key==='Enter')addTransaction()"></div>
+      <div class="g2 gap2">
+        <div class="fg"><label class="fl">Tipo</label><select class="fi" id="trt"><option value="Entrada">🟢 Entrada</option><option value="Saída">🔴 Saída</option></select></div>
+        <div class="fg"><label class="fl">Valor (R$)</label><input class="fi" type="number" step="0.01" min="0" id="trv" placeholder="0,00"></div>
+      </div>
+      <div class="fg"><label class="fl">Método</label><select class="fi" id="trm"><option>PIX</option><option>Cartão</option><option>Boleto</option><option>PayPal</option><option>Stripe</option></select></div>
+      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('transmod')">Cancelar</button><button class="bp" onclick="addTransaction()">💾 Lançar</button></div>
+    </div>
+  </div>
+
+  <!-- CREATIVE MODAL (NOVO) -->
+  <div class="moverlay" id="creativemod">
+    <div class="mbox">
+      <div class="mtitle">Novo Criativo</div>
+      <div class="mclose" onclick="closeM('creativemod')">✕</div>
+      <div class="fg"><label class="fl">Nome</label><input class="fi" id="crn" placeholder="Ex: Criativo-VSL-02..." onkeydown="if(event.key==='Enter')addCreative()"></div>
+      <div class="fg"><label class="fl">Plataforma</label><select class="fi" id="crp"><option>Meta Ads</option><option>Google Ads</option><option>TikTok Ads</option><option>Taboola</option><option>Outbrain</option></select></div>
+      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('creativemod')">Cancelar</button><button class="bp" onclick="addCreative()">➕ Adicionar</button></div>
+    </div>
+  </div>
+
+  <!-- ROLE MODAL (NOVO) -->
+  <div class="moverlay" id="rolemod">
+    <div class="mbox">
+      <div class="mtitle">Novo Cargo</div>
+      <div class="mclose" onclick="closeM('rolemod')">✕</div>
+      <div class="fg"><label class="fl">Nome do Cargo</label><input class="fi" id="rln" placeholder="Ex: Social Media..." onkeydown="if(event.key==='Enter')addRole()"></div>
+      <div class="fg"><label class="fl">Permissões (uma por linha)</label><textarea class="fi" id="rlp" placeholder="Dashboard&#10;Tarefas&#10;Vendas Próprias"></textarea></div>
+      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('rolemod')">Cancelar</button><button class="bp" onclick="addRole()">👔 Criar Cargo</button></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <div id="mobile-bottomnav">
+    <div class="bnav-item" onclick="mobileNav('dashboard',this)" id="bnav-dashboard"><span class="bnav-icon">📊</span>Dashboard</div>
+    <div class="bnav-item" onclick="mobileNav('tasks',this)" id="bnav-tasks"><span class="bnav-icon">📋</span>Tarefas</div>
+    <div class="bnav-item" onclick="mobileNav('financial',this)" id="bnav-financial"><span class="bnav-icon">💰</span>Financeiro</div>
+    <div class="bnav-item" onclick="mobileNav('campaigns',this)" id="bnav-campaigns"><span class="bnav-icon">🎯</span>Campanhas</div>
+    <div class="bnav-item" onclick="toggleSidebar()" id="bnav-menu"><span class="bnav-icon">☰</span>Menu</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
