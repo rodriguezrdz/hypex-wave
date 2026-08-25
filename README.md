@@ -2,6 +2,16 @@
 
 Aplicação web completa de gestão para negócios digitais: dashboard financeiro, kanban de tarefas, planejamento, produtos, vitrine, vendas, equipe, anúncios, campanhas, funis e assistente IA.
 
+## 🌌 v3 — Obsidian Aurora (design & motion)
+
+Redesign completo da experiência visual mantendo 100% do motor de negócio:
+
+- **Aurora Canvas** — ondas vivas ciano/menta respirando atrás de painéis de vidro obsidiana (pausa automática em aba oculta, `reduced-motion` ou quando você desativa animações em Aparência).
+- **Números que vivem** — KPIs, meta de faturamento e métricas animam com contagem suave a cada atualização.
+- **Micro-interações** — cards com tilt 3D sutil, botões magnéticos, transição de página cinematográfica.
+- **Dados isolados por conta** — cada usuário entra com tudo zerado; ninguém herda valores de outra conta no mesmo navegador (`fx.js` + governança no motor).
+- Arquivos novos/alterados nesta versão: `styles.css` (design system v3), `index.html` (shell), `fx.js` (camada de FX). Motor `app.js` preservado.
+
 ## O que foi melhorado nesta versão
 
 | Antes | Agora |

@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
 <title>HYPEX WAVE — Plataforma SaaS Empresarial</title>
 <meta name="description" content="HYPEX WAVE — plataforma de gestão para negócios digitais: financeiro, produtos, campanhas, equipe e funis em um só lugar.">
-<meta name="theme-color" content="#05070C">
+<meta name="theme-color" content="#04060B">
 <meta property="og:title" content="HYPEX WAVE">
 <meta property="og:description" content="Plataforma SaaS Empresarial Premium — financeiro, produtos, campanhas e equipe.">
 <meta property="og:type" content="website">
@@ -15,11 +16,19 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+<!-- Camadas de atmosfera (puramente decorativas · z-index 0 · o canvas de aurora do fx.js pinta por cima) -->
+<div class="fx-decor" aria-hidden="true">
+  <div class="fx-grid"></div>
+  <div class="fx-grain"></div>
+  <div class="fx-vignette"></div>
+</div>
 
 <!-- ==================== LOGIN ==================== -->
 <div id="ls">
@@ -41,33 +50,45 @@
           <div class="bfeat"><span class="bfeat-ico"><i data-lucide="bot"></i></span><span><b>HYPEX AI</b> — análise de negócio sob demanda</span></div>
           <div class="bfeat"><span class="bfeat-ico"><i data-lucide="cloud"></i></span><span><b>Nuvem segura</b> — seus dados sincronizados e isolados</span></div>
         </div>
+        <div class="brand-stats">
+          <div><b>R$ 0<span style="font-size:12px">+</span></b><span>faturado na plataforma</span></div>
+          <div><b>11</b><span>integrações prontas</span></div>
+          <div><b>100%</b><span>seus dados, seu controle</span></div>
+        </div>
       </div>
-      <div class="brand-foot"><span>© HYPEX WAVE</span><span>v2.0 Craft Edition</span></div>
+      <!-- Partitura de ondas — assinatura "Wave" da marca -->
+      <svg class="brand-waves" viewBox="0 0 1200 340" preserveAspectRatio="none" fill="none">
+        <path d="M0 240 C 150 180, 300 300, 450 240 S 750 180, 900 240 S 1150 300, 1200 240" stroke="rgba(0,229,255,.20)" stroke-width="1.5"/>
+        <path d="M0 268 C 160 210, 320 322, 480 264 S 780 208, 940 264 S 1140 318, 1200 262" stroke="rgba(125,249,198,.14)" stroke-width="1.5"/>
+        <path d="M0 296 C 170 244, 330 344, 500 290 S 800 236, 960 290 S 1130 334, 1200 284" stroke="rgba(27,79,216,.28)" stroke-width="1.5"/>
+        <path d="M0 212 C 140 156, 280 272, 430 216 S 720 158, 870 214 S 1120 274, 1200 218" stroke="rgba(143,247,255,.10)" stroke-width="1"/>
+      </svg>
+      <div class="brand-foot"><span>© HYPEX WAVE</span><span>v3.0 Obsidian Aura</span></div>
     </section>
 
     <!-- Formulário -->
-    <section class="auth-side">
-      <div class="lcard">
-        <div class="llogobox"><img src="assets/logo.jpg" alt="HYPEX WAVE"></div>
+    <section class="auth-side" aria-label="Acesso à plataforma">
+      <div class="lcard" role="form" aria-label="Entrar no HYPEX WAVE">
+        <div class="llogobox"><img src="assets/logo.jpg" alt="Logo HYPEX WAVE"></div>
         <div class="ltitle">HYPEX<span>WAVE</span></div>
         <div class="lsub">Plataforma SaaS Empresarial Premium</div>
         <div class="lmode"><span class="lmodebadge lmode-local" id="lmodebadge">MODO LOCAL</span></div>
-        <div class="lerr" id="lerr">Email ou senha inválidos.</div>
-        <div class="linfo" id="linfo"></div>
-        <div class="lfield" id="lnamefield" style="display:none"><label>Seu nome</label><input type="text" id="lname" placeholder="Como quer ser chamado?" autocomplete="name"></div>
-        <div class="lfield"><label>Email</label><input type="email" id="lemail" placeholder="seu@email.com" autocomplete="username"></div>
-        <div class="lfield"><label>Senha</label><input type="password" id="lpwd" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
-        <button class="lbtn" id="lbtn"><i data-lucide="zap"></i> ENTRAR NA PLATAFORMA</button>
+        <div class="lerr" id="lerr" role="alert" aria-live="assertive">Email ou senha inválidos.</div>
+        <div class="linfo" id="linfo" aria-live="polite"></div>
+        <div class="lfield" id="lnamefield" style="display:none"><label for="lname">Seu nome</label><input type="text" id="lname" placeholder="Como quer ser chamado?" autocomplete="name"></div>
+        <div class="lfield"><label for="lemail">Email</label><input type="email" id="lemail" placeholder="seu@email.com" autocomplete="username" aria-label="Email"></div>
+        <div class="lfield"><label for="lpwd">Senha</label><input type="password" id="lpwd" placeholder="••••••••" autocomplete="current-password" aria-label="Senha" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="lbtn" id="lbtn" type="button"><i data-lucide="zap"></i> ENTRAR NA PLATAFORMA</button>
         <div class="ldiv">ou</div>
-        <button class="lgbtn" onclick="doGLogin()">
-          <svg width="17" height="17" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.3z"/></svg>
+        <button class="lgbtn" type="button" onclick="doGLogin()" aria-label="Continuar com Google">
+          <svg width="17" height="17" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 01-7.18-2.54H1.83v2.07A8 8 0 008.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 010-3.04V5.41H1.83a8 8 0 000 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 001.83 5.4L4.5 7.49a4.77 4.77 0 014.48-3.3z"/></svg>
           Continuar com Google
         </button>
         <div class="lrow">
-          <a id="ltogglemode" onclick="toggleSignup()">Criar conta</a>
-          <a id="lforgot" onclick="doResetPwd()" style="display:none">Esqueci minha senha</a>
+          <a id="ltogglemode" role="button" tabindex="0" onclick="toggleSignup()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSignup()}">Criar conta</a>
+          <a id="lforgot" role="button" tabindex="0" style="display:none" onclick="doResetPwd()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();doResetPwd()}">Esqueci minha senha</a>
         </div>
-        <div class="lnote" id="lnote">Modo local — dados salvos apenas neste navegador</div>
+        <div class="lnote" id="lnote" aria-live="polite">Modo local — dados salvos apenas neste navegador</div>
       </div>
     </section>
 
@@ -76,18 +97,18 @@
 
 <!-- ==================== APP ==================== -->
 <div id="app">
-  <aside id="sb">
+  <aside id="sb" aria-label="Barra lateral">
     <div class="sbh">
       <img class="sbli" src="assets/logo.jpg" alt="">
       <div class="sbb"><b>HYPEX</b>WAVE<span>Business Platform</span></div>
     </div>
-    <div class="rvc" onclick="navTo('financial')">
+    <div class="rvc" role="button" tabindex="0" aria-label="Faturamento total e meta — abrir Financeiro" onclick="navTo('financial')" onkeydown="if(event.key==='Enter'){navTo('financial')}">
       <div class="rvch"><img class="rvwi" src="assets/logo.jpg" alt=""><div class="rvl">Faturamento Total</div></div>
       <div class="rva tnum" id="rvtotal">R$ 0,00</div>
       <div class="rvr" id="rvmeta">Meta: R$ 100.000,00</div>
       <div class="rvbar"><div class="rvbf" id="rvbf"></div></div>
     </div>
-    <nav class="sbn">
+    <nav class="sbn" aria-label="Navegação principal">
       <div class="ncat">Principal</div>
       <div class="ni active" data-page="dashboard" onclick="nav(this,'dashboard')"><span class="nic"><i data-lucide="layout-dashboard"></i></span> Dashboard</div>
       <div class="ni" data-page="tasks" onclick="nav(this,'tasks')"><span class="nic"><i data-lucide="list-checks"></i></span> Tarefas</div>
@@ -112,184 +133,184 @@
       <div class="ni" data-page="roles" onclick="nav(this,'roles')"><span class="nic"><i data-lucide="briefcase"></i></span> Cargos</div>
     </nav>
     <div class="sbf">
-      <div class="ucard" onclick="navTo('admin')">
+      <div class="ucard" role="button" tabindex="0" aria-label="Configurações da conta e administração" onclick="navTo('admin')" onkeydown="if(event.key==='Enter'){navTo('admin')}">
         <div class="uav" id="uav">N</div>
         <div><div class="uname" id="uname">—</div><div class="urole" id="urole">DONO</div></div>
-        <div style="margin-left:auto;color:var(--tx3);display:flex"><i data-lucide="settings"></i></div>
+        <div style="margin-left:auto;color:var(--tx3);display:flex" aria-hidden="true"><i data-lucide="settings"></i></div>
       </div>
     </div>
   </aside>
 
-  <div class="sb-backdrop" id="sbBackdrop" onclick="closeSidebar()"></div>
+  <div class="sb-backdrop" id="sbBackdrop" aria-hidden="true" onclick="closeSidebar()"></div>
 
   <div id="tb">
-    <div id="mobile-hamburger" onclick="toggleSidebar()"><i data-lucide="menu"></i></div>
+    <div id="mobile-hamburger" role="button" tabindex="0" aria-label="Abrir menu lateral" onclick="toggleSidebar()" onkeydown="if(event.key==='Enter'){toggleSidebar()}"><i data-lucide="menu"></i></div>
     <div class="tbtitle" id="tbtitle">Dashboard</div>
-    <span id="syncpill" class="local tbsearch-mobile-hide" title="Status da sincronização"><span class="sdot"></span><span id="synclabel">Local</span></span>
+    <span id="syncpill" class="local tbsearch-mobile-hide" role="status" aria-live="polite" title="Status da sincronização"><span class="sdot" aria-hidden="true"></span><span id="synclabel">Local</span></span>
     <div class="tbsearch">
-      <i data-lucide="search"></i>
-      <input placeholder="Busca global... (Ctrl+K)" id="gsearch" autocomplete="off">
-      <div id="gresults"></div>
+      <i data-lucide="search" aria-hidden="true"></i>
+      <input placeholder="Busca global... (Ctrl+K)" id="gsearch" autocomplete="off" aria-label="Busca global (Ctrl+K)">
+      <div id="gresults" role="listbox" aria-label="Resultados da busca"></div>
     </div>
     <div class="tbas">
-      <div class="tbbtn" id="notifbell" title="Notificações"><i data-lucide="bell"></i><div class="nbadge" id="notifbadge"></div>
-        <div id="notifpanel">
-          <div class="nph"><span class="npt">Notificações</span><span class="npmark" onclick="markAllSeen(event)">marcar lidas</span></div>
+      <div class="tbbtn" id="notifbell" role="button" tabindex="0" title="Notificações" aria-label="Notificações" onkeydown="if(event.key==='Enter'){this.click()}"><i data-lucide="bell"></i><div class="nbadge" id="notifbadge" aria-hidden="true"></div>
+        <div id="notifpanel" role="region" aria-label="Painel de notificações">
+          <div class="nph"><span class="npt">Notificações</span><span class="npmark" role="button" tabindex="0" onclick="markAllSeen(event)" onkeydown="if(event.key==='Enter'){markAllSeen(event)}">marcar lidas</span></div>
           <div id="notiflist"></div>
         </div>
       </div>
-      <div class="tbbtn" onclick="toggleAI()" title="HYPEX AI"><i data-lucide="bot"></i></div>
-      <div class="tbbtn" onclick="doLogout()" title="Sair"><i data-lucide="log-out"></i></div>
+      <div class="tbbtn" role="button" tabindex="0" onclick="toggleAI()" onkeydown="if(event.key==='Enter'){toggleAI()}" title="HYPEX AI" aria-label="Abrir HYPEX AI"><i data-lucide="bot"></i></div>
+      <div class="tbbtn" role="button" tabindex="0" onclick="doLogout()" onkeydown="if(event.key==='Enter'){doLogout()}" title="Sair" aria-label="Sair da plataforma"><i data-lucide="log-out"></i></div>
     </div>
   </div>
 
   <main id="mc"></main>
 
-  <div id="aiorb" onclick="toggleAI()" title="HYPEX AI">
-    <img src="assets/ai-orb.jpg" alt="HYPEX AI">
+  <div id="aiorb" role="button" tabindex="0" aria-label="Abrir assistente HYPEX AI" onclick="toggleAI()" onkeydown="if(event.key==='Enter'){toggleAI()}" title="HYPEX AI">
+    <img src="assets/ai-orb.jpg" alt="">
     <div class="ailab">HYPEX AI</div>
   </div>
 
-  <div id="aimod">
+  <div id="aimod" role="dialog" aria-modal="false" aria-label="Chat HYPEX AI">
     <div class="aimh">
       <img class="aimli" src="assets/ai-orb.jpg" alt="">
       <div class="aimtitle">HYPEX AI</div>
-      <div class="aist"><div class="aistd"></div>ONLINE</div>
-      <div onclick="toggleAI()" style="cursor:pointer;color:var(--tx3);margin-left:6px;display:flex"><i data-lucide="x"></i></div>
+      <div class="aist"><div class="aistd" aria-hidden="true"></div>ONLINE</div>
+      <div role="button" tabindex="0" aria-label="Fechar chat" onclick="toggleAI()" onkeydown="if(event.key==='Enter'){toggleAI()}" style="cursor:pointer;color:var(--tx3);margin-left:6px;display:flex"><i data-lucide="x"></i></div>
     </div>
-    <div class="aimsgs" id="aimsgs">
+    <div class="aimsgs" id="aimsgs" role="log" aria-live="polite" aria-label="Mensagens da HYPEX AI">
       <div class="aimsg bot">Olá! Sou a HYPEX AI, sua analista de negócios. Pergunte sobre faturamento, metas, campanhas, produtos ou equipe — ou peça "criar tarefa ..." que eu faço pra você.</div>
     </div>
     <div class="aiin">
-      <input class="aiinput" id="aiinput" placeholder="Pergunte à HYPEX AI..." onkeydown="if(event.key==='Enter')sendAI()">
-      <button class="aisend" onclick="sendAI()" title="Enviar"><i data-lucide="send-horizontal"></i></button>
+      <input class="aiinput" id="aiinput" placeholder="Pergunte à HYPEX AI..." aria-label="Mensagem para a HYPEX AI" onkeydown="if(event.key==='Enter')sendAI()">
+      <button class="aisend" type="button" onclick="sendAI()" title="Enviar" aria-label="Enviar mensagem"><i data-lucide="send-horizontal"></i></button>
     </div>
   </div>
 
   <!-- TASK MODAL -->
-  <div class="moverlay" id="taskmod">
+  <div class="moverlay" id="taskmod" role="dialog" aria-modal="true" aria-label="Nova Tarefa">
     <div class="mbox">
       <div class="mtitle">Nova Tarefa</div>
-      <div class="mclose" onclick="closeM('taskmod')"><i data-lucide="x"></i></div>
-      <div class="fg"><label class="fl">Título</label><input class="fi" id="ti" placeholder="Nome da tarefa..." onkeydown="if(event.key==='Enter')addTask()"></div>
-      <div class="fg"><label class="fl">Prioridade</label><select class="fi" id="tpri"><option value="high">Alta</option><option value="med">Média</option><option value="low">Baixa</option></select></div>
-      <div class="fg"><label class="fl">Prazo</label><input class="fi" type="date" id="tdue"></div>
-      <div class="fg"><label class="fl">Responsável</label><input class="fi" id="tass" placeholder="Nome..."></div>
-      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('taskmod')">Cancelar</button><button class="bp" onclick="addTask()"><i data-lucide="check"></i> Criar Tarefa</button></div>
+      <div class="mclose" role="button" tabindex="0" aria-label="Fechar" onclick="closeM('taskmod')" onkeydown="if(event.key==='Enter'){closeM('taskmod')}"><i data-lucide="x"></i></div>
+      <div class="fg"><label class="fl" for="ti">Título</label><input class="fi" id="ti" placeholder="Nome da tarefa..." onkeydown="if(event.key==='Enter')addTask()"></div>
+      <div class="fg"><label class="fl" for="tpri">Prioridade</label><select class="fi" id="tpri"><option value="high">Alta</option><option value="med">Média</option><option value="low">Baixa</option></select></div>
+      <div class="fg"><label class="fl" for="tdue">Prazo</label><input class="fi" type="date" id="tdue"></div>
+      <div class="fg"><label class="fl" for="tass">Responsável</label><input class="fi" id="tass" placeholder="Nome..."></div>
+      <div class="flex gap2 je mt4"><button class="bg" type="button" onclick="closeM('taskmod')">Cancelar</button><button class="bp" type="button" onclick="addTask()"><i data-lucide="check"></i> Criar Tarefa</button></div>
     </div>
   </div>
 
   <!-- EVENT MODAL -->
-  <div class="moverlay" id="evtmod">
+  <div class="moverlay" id="evtmod" role="dialog" aria-modal="true" aria-label="Novo Evento">
     <div class="mbox">
       <div class="mtitle">Novo Evento</div>
-      <div class="mclose" onclick="closeM('evtmod')"><i data-lucide="x"></i></div>
-      <div class="fg"><label class="fl">Título</label><input class="fi" id="eti" placeholder="Nome do evento..." onkeydown="if(event.key==='Enter')addEvent()"></div>
-      <div class="fg"><label class="fl">Data</label><input class="fi" type="date" id="edate"></div>
-      <div class="fg"><label class="fl">Categoria</label><select class="fi" id="ecat"><option value="meet">Reunião</option><option value="launch">Lançamento</option><option value="dead">Prazo</option><option value="pers">Pessoal</option></select></div>
-      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('evtmod')">Cancelar</button><button class="bp" onclick="addEvent()"><i data-lucide="calendar-plus"></i> Adicionar</button></div>
+      <div class="mclose" role="button" tabindex="0" aria-label="Fechar" onclick="closeM('evtmod')" onkeydown="if(event.key==='Enter'){closeM('evtmod')}"><i data-lucide="x"></i></div>
+      <div class="fg"><label class="fl" for="eti">Título</label><input class="fi" id="eti" placeholder="Nome do evento..." onkeydown="if(event.key==='Enter')addEvent()"></div>
+      <div class="fg"><label class="fl" for="edate">Data</label><input class="fi" type="date" id="edate"></div>
+      <div class="fg"><label class="fl" for="ecat">Categoria</label><select class="fi" id="ecat"><option value="meet">Reunião</option><option value="launch">Lançamento</option><option value="dead">Prazo</option><option value="pers">Pessoal</option></select></div>
+      <div class="flex gap2 je mt4"><button class="bg" type="button" onclick="closeM('evtmod')">Cancelar</button><button class="bp" type="button" onclick="addEvent()"><i data-lucide="calendar-plus"></i> Adicionar</button></div>
     </div>
   </div>
 
   <!-- PRODUCT MODAL -->
-  <div class="moverlay" id="prodmod">
+  <div class="moverlay" id="prodmod" role="dialog" aria-modal="true" aria-label="Novo Produto">
     <div class="mbox">
       <div class="mtitle">Novo Produto</div>
-      <div class="mclose" onclick="closeM('prodmod')"><i data-lucide="x"></i></div>
-      <div class="fg"><label class="fl">Nome</label><input class="fi" id="pni" placeholder="Nome do produto..." onkeydown="if(event.key==='Enter')addProduct()"></div>
-      <div class="fg"><label class="fl">Nicho</label><input class="fi" id="pniche" placeholder="Ex: Emagrecimento..."></div>
-      <div class="fg"><label class="fl">Preço (R$)</label><input class="fi" type="number" step="0.01" min="0" id="pprice" placeholder="0,00"></div>
-      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('prodmod')">Cancelar</button><button class="bp" onclick="addProduct()"><i data-lucide="package-plus"></i> Adicionar</button></div>
+      <div class="mclose" role="button" tabindex="0" aria-label="Fechar" onclick="closeM('prodmod')" onkeydown="if(event.key==='Enter'){closeM('prodmod')}"><i data-lucide="x"></i></div>
+      <div class="fg"><label class="fl" for="pni">Nome</label><input class="fi" id="pni" placeholder="Nome do produto..." onkeydown="if(event.key==='Enter')addProduct()"></div>
+      <div class="fg"><label class="fl" for="pniche">Nicho</label><input class="fi" id="pniche" placeholder="Ex: Emagrecimento..."></div>
+      <div class="fg"><label class="fl" for="pprice">Preço (R$)</label><input class="fi" type="number" step="0.01" min="0" id="pprice" placeholder="0,00"></div>
+      <div class="flex gap2 je mt4"><button class="bg" type="button" onclick="closeM('prodmod')">Cancelar</button><button class="bp" type="button" onclick="addProduct()"><i data-lucide="package-plus"></i> Adicionar</button></div>
     </div>
   </div>
 
   <!-- CAMPAIGN MODAL -->
-  <div class="moverlay" id="campmod">
+  <div class="moverlay" id="campmod" role="dialog" aria-modal="true" aria-label="Nova Campanha">
     <div class="mbox">
       <div class="mtitle">Nova Campanha</div>
-      <div class="mclose" onclick="closeM('campmod')"><i data-lucide="x"></i></div>
-      <div class="fg"><label class="fl">Nome da Campanha</label><input class="fi" id="cni" placeholder="Nome..." onkeydown="if(event.key==='Enter')addCampaign()"></div>
-      <div class="fg"><label class="fl">Plataforma</label><select class="fi" id="cplt"><option>Meta Ads</option><option>Google Ads</option><option>TikTok Ads</option><option>Taboola</option><option>Outbrain</option></select></div>
-      <div class="fg"><label class="fl">Orçamento (R$)</label><input class="fi" type="number" step="0.01" min="0" id="cbud" placeholder="0,00"></div>
-      <div class="fg"><label class="fl">Status</label><select class="fi" id="cst"><option>Ativa</option><option>Pausada</option><option>Finalizada</option></select></div>
-      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('campmod')">Cancelar</button><button class="bp" onclick="addCampaign()"><i data-lucide="target"></i> Criar</button></div>
+      <div class="mclose" role="button" tabindex="0" aria-label="Fechar" onclick="closeM('campmod')" onkeydown="if(event.key==='Enter'){closeM('campmod')}"><i data-lucide="x"></i></div>
+      <div class="fg"><label class="fl" for="cni">Nome da Campanha</label><input class="fi" id="cni" placeholder="Nome..." onkeydown="if(event.key==='Enter')addCampaign()"></div>
+      <div class="fg"><label class="fl" for="cplt">Plataforma</label><select class="fi" id="cplt"><option>Meta Ads</option><option>Google Ads</option><option>TikTok Ads</option><option>Taboola</option><option>Outbrain</option></select></div>
+      <div class="fg"><label class="fl" for="cbud">Orçamento (R$)</label><input class="fi" type="number" step="0.01" min="0" id="cbud" placeholder="0,00"></div>
+      <div class="fg"><label class="fl" for="cst">Status</label><select class="fi" id="cst"><option>Ativa</option><option>Pausada</option><option>Finalizada</option></select></div>
+      <div class="flex gap2 je mt4"><button class="bg" type="button" onclick="closeM('campmod')">Cancelar</button><button class="bp" type="button" onclick="addCampaign()"><i data-lucide="target"></i> Criar</button></div>
     </div>
   </div>
 
   <!-- TEAM INVITE MODAL -->
-  <div class="moverlay" id="invmod">
+  <div class="moverlay" id="invmod" role="dialog" aria-modal="true" aria-label="Adicionar Membro">
     <div class="mbox">
       <div class="mtitle">Adicionar Membro</div>
-      <div class="mclose" onclick="closeM('invmod')"><i data-lucide="x"></i></div>
-      <div class="fg"><label class="fl">Nome</label><input class="fi" id="iname" placeholder="Nome do membro..."></div>
-      <div class="fg"><label class="fl">Email</label><input class="fi" id="imail" placeholder="email@empresa.com" onkeydown="if(event.key==='Enter')sendInvite()"></div>
-      <div class="fg"><label class="fl">Cargo</label><select class="fi" id="irole"><option>Colaborador</option><option>Gerente</option><option>Administrador</option><option>Sócio</option></select></div>
-      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('invmod')">Cancelar</button><button class="bp" onclick="sendInvite()"><i data-lucide="mail"></i> Adicionar & Convidar</button></div>
+      <div class="mclose" role="button" tabindex="0" aria-label="Fechar" onclick="closeM('invmod')" onkeydown="if(event.key==='Enter'){closeM('invmod')}"><i data-lucide="x"></i></div>
+      <div class="fg"><label class="fl" for="iname">Nome</label><input class="fi" id="iname" placeholder="Nome do membro..."></div>
+      <div class="fg"><label class="fl" for="imail">Email</label><input class="fi" id="imail" placeholder="email@empresa.com" onkeydown="if(event.key==='Enter')sendInvite()"></div>
+      <div class="fg"><label class="fl" for="irole">Cargo</label><select class="fi" id="irole"><option>Colaborador</option><option>Gerente</option><option>Administrador</option><option>Sócio</option></select></div>
+      <div class="flex gap2 je mt4"><button class="bg" type="button" onclick="closeM('invmod')">Cancelar</button><button class="bp" type="button" onclick="sendInvite()"><i data-lucide="mail"></i> Adicionar & Convidar</button></div>
     </div>
   </div>
 
   <!-- FUNNEL MODAL -->
-  <div class="moverlay" id="funnelmod">
+  <div class="moverlay" id="funnelmod" role="dialog" aria-modal="true" aria-label="Criar Funil">
     <div class="mbox">
       <div class="mtitle">Criar Funil</div>
-      <div class="mclose" onclick="closeM('funnelmod')"><i data-lucide="x"></i></div>
+      <div class="mclose" role="button" tabindex="0" aria-label="Fechar" onclick="closeM('funnelmod')" onkeydown="if(event.key==='Enter'){closeM('funnelmod')}"><i data-lucide="x"></i></div>
       <p style="font-size:12.5px;color:var(--tx2);margin-bottom:16px">Escolha o nicho para gerar o mapa visual do funil:</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px" id="nicheGrid">
-        <div class="nicheopt" onclick="createFunnel('Emagrecimento')" style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:11px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cdim)'" onmouseout="this.style.borderColor='var(--bd)'">Emagrecimento</div>
-        <div class="nicheopt" onclick="createFunnel('Relacionamento')" style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:11px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cdim)'" onmouseout="this.style.borderColor='var(--bd)'">Relacionamento</div>
-        <div class="nicheopt" onclick="createFunnel('Finanças')" style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:11px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cdim)'" onmouseout="this.style.borderColor='var(--bd)'">Finanças</div>
-        <div class="nicheopt" onclick="createFunnel('Saúde')" style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:11px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cdim)'" onmouseout="this.style.borderColor='var(--bd)'">Saúde</div>
-        <div class="nicheopt" onclick="createFunnel('E-commerce')" style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:11px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cdim)'" onmouseout="this.style.borderColor='var(--bd)'">E-commerce</div>
-        <div class="nicheopt" onclick="createFunnel('Outros')" style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:11px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cdim)'" onmouseout="this.style.borderColor='var(--bd)'">Outros</div>
+        <div class="nicheopt" role="button" tabindex="0" onclick="createFunnel('Emagrecimento')" onkeydown="if(event.key==='Enter'){createFunnel('Emagrecimento')}" style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:11px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cdim)'" onmouseout="this.style.borderColor='var(--bd)'">Emagrecimento</div>
+        <div class="nicheopt" role="button" tabindex="0" onclick="createFunnel('Relacionamento')" onkeydown="if(event.key==='Enter'){createFunnel('Relacionamento')}" style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:11px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cdim)'" onmouseout="this.style.borderColor='var(--bd)'">Relacionamento</div>
+        <div class="nicheopt" role="button" tabindex="0" onclick="createFunnel('Finanças')" onkeydown="if(event.key==='Enter'){createFunnel('Finanças')}" style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:11px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cdim)'" onmouseout="this.style.borderColor='var(--bd)'">Finanças</div>
+        <div class="nicheopt" role="button" tabindex="0" onclick="createFunnel('Saúde')" onkeydown="if(event.key==='Enter'){createFunnel('Saúde')}" style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:11px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cdim)'" onmouseout="this.style.borderColor='var(--bd)'">Saúde</div>
+        <div class="nicheopt" role="button" tabindex="0" onclick="createFunnel('E-commerce')" onkeydown="if(event.key==='Enter'){createFunnel('E-commerce')}" style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:11px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cdim)'" onmouseout="this.style.borderColor='var(--bd)'">E-commerce</div>
+        <div class="nicheopt" role="button" tabindex="0" onclick="createFunnel('Outros')" onkeydown="if(event.key==='Enter'){createFunnel('Outros')}" style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:11px;text-align:center;cursor:pointer;font-size:12px;transition:all .2s" onmouseover="this.style.borderColor='var(--cdim)'" onmouseout="this.style.borderColor='var(--bd)'">Outros</div>
       </div>
     </div>
   </div>
 
   <!-- TRANSACTION MODAL -->
-  <div class="moverlay" id="transmod">
+  <div class="moverlay" id="transmod" role="dialog" aria-modal="true" aria-label="Novo Lançamento">
     <div class="mbox">
       <div class="mtitle">Novo Lançamento</div>
-      <div class="mclose" onclick="closeM('transmod')"><i data-lucide="x"></i></div>
-      <div class="fg"><label class="fl">Descrição</label><input class="fi" id="trd" placeholder="Ex: Venda HYPEX Method..." onkeydown="if(event.key==='Enter')addTransaction()"></div>
+      <div class="mclose" role="button" tabindex="0" aria-label="Fechar" onclick="closeM('transmod')" onkeydown="if(event.key==='Enter'){closeM('transmod')}"><i data-lucide="x"></i></div>
+      <div class="fg"><label class="fl" for="trd">Descrição</label><input class="fi" id="trd" placeholder="Ex: Venda HYPEX Method..." onkeydown="if(event.key==='Enter')addTransaction()"></div>
       <div class="g2 gap2">
-        <div class="fg"><label class="fl">Tipo</label><select class="fi" id="trt"><option value="Entrada">Entrada</option><option value="Saída">Saída</option></select></div>
-        <div class="fg"><label class="fl">Valor (R$)</label><input class="fi" type="number" step="0.01" min="0" id="trv" placeholder="0,00"></div>
+        <div class="fg"><label class="fl" for="trt">Tipo</label><select class="fi" id="trt"><option value="Entrada">Entrada</option><option value="Saída">Saída</option></select></div>
+        <div class="fg"><label class="fl" for="trv">Valor (R$)</label><input class="fi" type="number" step="0.01" min="0" id="trv" placeholder="0,00"></div>
       </div>
-      <div class="fg"><label class="fl">Método</label><select class="fi" id="trm"><option>PIX</option><option>Cartão</option><option>Boleto</option><option>PayPal</option><option>Stripe</option></select></div>
-      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('transmod')">Cancelar</button><button class="bp" onclick="addTransaction()"><i data-lucide="save"></i> Lançar</button></div>
+      <div class="fg"><label class="fl" for="trm">Método</label><select class="fi" id="trm"><option>PIX</option><option>Cartão</option><option>Boleto</option><option>PayPal</option><option>Stripe</option></select></div>
+      <div class="flex gap2 je mt4"><button class="bg" type="button" onclick="closeM('transmod')">Cancelar</button><button class="bp" type="button" onclick="addTransaction()"><i data-lucide="save"></i> Lançar</button></div>
     </div>
   </div>
 
   <!-- CREATIVE MODAL -->
-  <div class="moverlay" id="creativemod">
+  <div class="moverlay" id="creativemod" role="dialog" aria-modal="true" aria-label="Novo Criativo">
     <div class="mbox">
       <div class="mtitle">Novo Criativo</div>
-      <div class="mclose" onclick="closeM('creativemod')"><i data-lucide="x"></i></div>
-      <div class="fg"><label class="fl">Nome</label><input class="fi" id="crn" placeholder="Ex: Criativo-VSL-02..." onkeydown="if(event.key==='Enter')addCreative()"></div>
-      <div class="fg"><label class="fl">Plataforma</label><select class="fi" id="crp"><option>Meta Ads</option><option>Google Ads</option><option>TikTok Ads</option><option>Taboola</option><option>Outbrain</option></select></div>
-      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('creativemod')">Cancelar</button><button class="bp" onclick="addCreative()"><i data-lucide="plus"></i> Adicionar</button></div>
+      <div class="mclose" role="button" tabindex="0" aria-label="Fechar" onclick="closeM('creativemod')" onkeydown="if(event.key==='Enter'){closeM('creativemod')}"><i data-lucide="x"></i></div>
+      <div class="fg"><label class="fl" for="crn">Nome</label><input class="fi" id="crn" placeholder="Ex: Criativo-VSL-02..." onkeydown="if(event.key==='Enter')addCreative()"></div>
+      <div class="fg"><label class="fl" for="crp">Plataforma</label><select class="fi" id="crp"><option>Meta Ads</option><option>Google Ads</option><option>TikTok Ads</option><option>Taboola</option><option>Outbrain</option></select></div>
+      <div class="flex gap2 je mt4"><button class="bg" type="button" onclick="closeM('creativemod')">Cancelar</button><button class="bp" type="button" onclick="addCreative()"><i data-lucide="plus"></i> Adicionar</button></div>
     </div>
   </div>
 
   <!-- ROLE MODAL -->
-  <div class="moverlay" id="rolemod">
+  <div class="moverlay" id="rolemod" role="dialog" aria-modal="true" aria-label="Novo Cargo">
     <div class="mbox">
       <div class="mtitle">Novo Cargo</div>
-      <div class="mclose" onclick="closeM('rolemod')"><i data-lucide="x"></i></div>
-      <div class="fg"><label class="fl">Nome do Cargo</label><input class="fi" id="rln" placeholder="Ex: Social Media..." onkeydown="if(event.key==='Enter')addRole()"></div>
-      <div class="fg"><label class="fl">Permissões (uma por linha)</label><textarea class="fi" id="rlp" placeholder="Dashboard&#10;Tarefas&#10;Vendas Próprias"></textarea></div>
-      <div class="flex gap2 je mt4"><button class="bg" onclick="closeM('rolemod')">Cancelar</button><button class="bp" onclick="addRole()"><i data-lucide="briefcase"></i> Criar Cargo</button></div>
+      <div class="mclose" role="button" tabindex="0" aria-label="Fechar" onclick="closeM('rolemod')" onkeydown="if(event.key==='Enter'){closeM('rolemod')}"><i data-lucide="x"></i></div>
+      <div class="fg"><label class="fl" for="rln">Nome do Cargo</label><input class="fi" id="rln" placeholder="Ex: Social Media..." onkeydown="if(event.key==='Enter')addRole()"></div>
+      <div class="fg"><label class="fl" for="rlp">Permissões (uma por linha)</label><textarea class="fi" id="rlp" placeholder="Dashboard&#10;Tarefas&#10;Vendas Próprias"></textarea></div>
+      <div class="flex gap2 je mt4"><button class="bg" type="button" onclick="closeM('rolemod')">Cancelar</button><button class="bp" type="button" onclick="addRole()"><i data-lucide="briefcase"></i> Criar Cargo</button></div>
     </div>
   </div>
 
-  <div id="toast"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
 
-  <div id="mobile-bottomnav">
-    <div class="bnav-item" onclick="mobileNav('dashboard',this)" id="bnav-dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</div>
-    <div class="bnav-item" onclick="mobileNav('tasks',this)" id="bnav-tasks"><i data-lucide="list-checks"></i>Tarefas</div>
-    <div class="bnav-item" onclick="mobileNav('financial',this)" id="bnav-financial"><i data-lucide="wallet"></i>Financeiro</div>
-    <div class="bnav-item" onclick="mobileNav('campaigns',this)" id="bnav-campaigns"><i data-lucide="target"></i>Campanhas</div>
-    <div class="bnav-item" onclick="toggleSidebar()" id="bnav-menu"><i data-lucide="menu"></i>Menu</div>
+  <div id="mobile-bottomnav" role="navigation" aria-label="Navegação inferior">
+    <div class="bnav-item" role="button" tabindex="0" onclick="mobileNav('dashboard',this)" onkeydown="if(event.key==='Enter'){mobileNav('dashboard',this)}" id="bnav-dashboard" aria-label="Dashboard"><i data-lucide="layout-dashboard"></i>Dashboard</div>
+    <div class="bnav-item" role="button" tabindex="0" onclick="mobileNav('tasks',this)" onkeydown="if(event.key==='Enter'){mobileNav('tasks',this)}" id="bnav-tasks" aria-label="Tarefas"><i data-lucide="list-checks"></i>Tarefas</div>
+    <div class="bnav-item" role="button" tabindex="0" onclick="mobileNav('financial',this)" onkeydown="if(event.key==='Enter'){mobileNav('financial',this)}" id="bnav-financial" aria-label="Financeiro"><i data-lucide="wallet"></i>Financeiro</div>
+    <div class="bnav-item" role="button" tabindex="0" onclick="mobileNav('campaigns',this)" onkeydown="if(event.key==='Enter'){mobileNav('campaigns',this)}" id="bnav-campaigns" aria-label="Campanhas"><i data-lucide="target"></i>Campanhas</div>
+    <div class="bnav-item" role="button" tabindex="0" onclick="toggleSidebar()" onkeydown="if(event.key==='Enter'){toggleSidebar()}" id="bnav-menu" aria-label="Abrir menu completo"><i data-lucide="menu"></i>Menu</div>
   </div>
 </div>
 
@@ -297,5 +318,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
+<script src="fx.js"></script>
 </body>
 </html>

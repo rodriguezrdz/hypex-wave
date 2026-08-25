@@ -20,91 +20,31 @@ function daysDiff(iso) {
   return Math.round((d - n) / 86400000);
 }
 
-// ===== SEED =====
-function seedTransactions() {
-  const now = new Date();
-  const m = now.getMonth(), y = now.getFullYear(), today = now.getDate();
-  const d = (day) => y + "-" + pad2(m + 1) + "-" + pad2(Math.min(day, today));
-  return [
-    { id: 101, desc: "Venda HYPEX Method", type: "Entrada", value: 297, method: "PIX", date: d(2) },
-    { id: 102, desc: "Venda FinanceX Pro", type: "Entrada", value: 197, method: "Cartão", date: d(4) },
-    { id: 103, desc: "Assinatura ActiveCampaign", type: "Saída", value: 245, method: "Cartão", date: d(5) },
-    { id: 104, desc: "Comissão Afiliação Kiwify", type: "Entrada", value: 156, method: "PIX", date: d(8) },
-    { id: 105, desc: "Venda BodyTransform", type: "Entrada", value: 147, method: "PIX", date: d(11) },
-    { id: 106, desc: "Assinatura Hotmart", type: "Saída", value: 99, method: "Boleto", date: d(13) },
-    { id: 107, desc: "Investimento Meta Ads", type: "Saída", value: 2840, method: "Cartão", date: d(15) },
-    { id: 108, desc: "Venda HYPEX Method (combo)", type: "Entrada", value: 497, method: "Cartão", date: d(18) },
-    { id: 109, desc: "Comissão Kirvano", type: "Entrada", value: 213, method: "PIX", date: d(20) },
-    { id: 110, desc: "Ferramentas & Softwares", type: "Saída", value: 380, method: "Cartão", date: d(22) }
-  ];
-}
-function seedSales() {
-  const names = ["HYPEX Method", "FinanceX Pro", "BodyTransform"];
-  const prices = [297, 197, 147];
-  const plats = ["Kiwify", "Kirvano", "Cakto"];
-  const buyers = ["M. Oliveira", "J. Santos", "A. Ferreira", "C. Lima", "R. Alves", "P. Souza", "L. Costa", "T. Rocha"];
-  const out = [];
-  for (let i = 0; i < 26; i++) {
-    const p = Math.floor(Math.random() * 3);
-    out.push({
-      id: 200 + i,
-      product: names[p],
-      buyer: buyers[Math.floor(Math.random() * buyers.length)],
-      value: prices[p] + (Math.random() > 0.75 ? 100 : 0),
-      platform: plats[Math.floor(Math.random() * plats.length)],
-      status: Math.random() > 0.18 ? "Pago" : "Pendente",
-      date: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toISOString()
-    });
-  }
-  return out.sort((a, b) => b.date.localeCompare(a.date));
-}
+// ===== ESTADO INICIAL =====
+// REGRA DE OURO: todo usuário NOVO entra com TODOS os dados zerados.
+// Nenhum dado de exemplo é criado automaticamente — os dados de exemplo
+// existem apenas como opção explícita no dashboard ("Carregar exemplo").
 
 function defaultState() {
   return {
     user: { name: "", email: "", role: "DONO" },
-    revenueTarget: 100000,
+    revenueTarget: 0,
+    transactions: [],
+    salesHistory: [],
     tasks: {
-      todo: [
-        { id: 1, title: "Criar campanha Meta Ads para o Q4", pri: "high", due: "", assignee: "Nunez" },
-        { id: 2, title: "Revisar relatório financeiro mensal", pri: "med", due: "", assignee: "Equipe" }
-      ],
-      doing: [{ id: 3, title: "Desenvolver landing page do Produto X", pri: "high", due: "", assignee: "Dev" }],
-      done: [{ id: 4, title: "Configurar integração Kiwify", pri: "low", due: "", assignee: "Nunez" }]
+      todo: [],
+      doing: [],
+      done: []
     },
     events: [],
-    products: [
-      { id: 1, name: "HYPEX Method", niche: "Produtividade", price: 297, revenue: 18420, conv: 3.2 },
-      { id: 2, name: "FinanceX Pro", niche: "Finanças", price: 197, revenue: 12640, conv: 4.1 },
-      { id: 3, name: "BodyTransform", niche: "Emagrecimento", price: 147, revenue: 9870, conv: 5.3 }
-    ],
-    affiliations: [
-      { id: 1, platform: "Kiwify", commission: 40, sales: 28, profit: 4380 },
-      { id: 2, platform: "Kirvano", commission: 35, sales: 19, profit: 2850 }
-    ],
-    team: [
-      { id: 1, name: "Nunez", email: "rodriguez.founder@gmail.com", role: "Dono", sales: 89, revenue: 34200, commission: 0, status: "Ativo" },
-      { id: 2, name: "Ana Silva", email: "ana@hypex.com", role: "Gerente", sales: 34, revenue: 13200, commission: 1320, status: "Ativo" },
-      { id: 3, name: "Carlos Dev", email: "carlos@hypex.com", role: "Colaborador", sales: 18, revenue: 7020, commission: 702, status: "Ativo" }
-    ],
-    campaigns: [
-      { id: 1, name: "Black Friday Q4", platform: "Meta Ads", budget: 3200, spend: 2840, roi: 340, status: "Ativa" },
-      { id: 2, name: "Google Search Produto A", platform: "Google Ads", budget: 1500, spend: 1500, roi: 220, status: "Finalizada" },
-      { id: 3, name: "TikTok Awareness", platform: "TikTok Ads", budget: 800, spend: 420, roi: 0, status: "Pausada" }
-    ],
-    creatives: [
-      { id: 1, name: "Criativo-001-VSL", platform: "Meta Ads", revenue: 18240, roi: 340, roas: 4.2, conv: 3.8, status: "Ativo" },
-      { id: 2, name: "Criativo-002-IMG", platform: "Meta Ads", revenue: 9120, roi: 280, roas: 3.8, conv: 2.9, status: "Ativo" },
-      { id: 3, name: "Keyword-Brand", platform: "Google Ads", revenue: 12480, roi: 220, roas: 3.2, conv: 4.1, status: "Ativo" },
-      { id: 4, name: "TK-Reels-A", platform: "TikTok Ads", revenue: 4200, roi: 180, roas: 2.8, conv: 2.1, status: "Pausado" },
-      { id: 5, name: "Tab-Native-01", platform: "Taboola", revenue: 2880, roi: 140, roas: 2.2, conv: 1.4, status: "Ativo" }
-    ],
-    integrations: { meta: true, google: false, tiktok: false, taboola: false, outbrain: false, analytics: true, stripe: false, paypal: false, kirvano: true, kiwify: true, cakto: false },
+    products: [],
+    affiliations: [],
+    team: [],
+    campaigns: [],
+    creatives: [],
+    integrations: { meta: false, google: false, tiktok: false, taboola: false, outbrain: false, analytics: false, stripe: false, paypal: false, kirvano: false, kiwify: false, cakto: false },
     funnel: null,
-    testProducts: [
-      { id: 1, name: "Programa Alpha", endsAt: Date.now() + ((2 * 24 + 14) * 3600 + 32 * 60) * 1000 },
-      { id: 2, name: "Curso Beta", endsAt: Date.now() + ((1 * 24 + 8) * 3600 + 11 * 60) * 1000 },
-      { id: 3, name: "Ebook Gamma", endsAt: Date.now() + (3 * 3600 + 45 * 60) * 1000 }
-    ],
+    testProducts: [],
     roles: [
       { id: 1, name: "Dono", perms: ["Tudo"] },
       { id: 2, name: "Sócio", perms: ["Dashboard", "Financeiro", "Equipe", "Relatórios", "Admin"] },
@@ -118,32 +58,151 @@ function defaultState() {
   };
 }
 
-let S = defaultState();
-S.transactions = seedTransactions();
-S.salesHistory = seedSales();
 
-// ===== PERSISTÊNCIA LOCAL =====
-const LS_KEY = "hypexwave.state.v1";
+// ===== DADOS DE EXEMPLO (opt-in) =====
+function demoSeed() {
+  const now = new Date();
+  const d = (day) => now.getFullYear() + "-" + pad2(now.getMonth() + 1) + "-" + pad2(Math.min(day, now.getDate()));
+  const names = ["HYPEX Method", "FinanceX Pro", "BodyTransform"];
+  const prices = [297, 197, 147];
+  const sales = [];
+  for (let i = 0; i < 26; i++) {
+    const p = Math.floor(Math.random() * 3);
+    sales.push({ id: 200 + i, product: names[p], buyer: "Cliente " + (i + 1), value: prices[p] + (Math.random() > 0.75 ? 100 : 0), platform: ["Kiwify", "Kirvano", "Cakto"][Math.floor(Math.random() * 3)], status: Math.random() > 0.18 ? "Pago" : "Pendente", date: new Date(Date.now() - Math.floor(Math.random() * 30) * 86400000).toISOString() });
+  }
+  return {
+    revenueTarget: 100000,
+    transactions: [
+      { id: 101, desc: "Venda HYPEX Method", type: "Entrada", value: 297, method: "PIX", date: d(2) },
+      { id: 102, desc: "Venda FinanceX Pro", type: "Entrada", value: 197, method: "Cartão", date: d(4) },
+      { id: 103, desc: "Assinatura ActiveCampaign", type: "Saída", value: 245, method: "Cartão", date: d(5) },
+      { id: 104, desc: "Comissão Afiliação Kiwify", type: "Entrada", value: 156, method: "PIX", date: d(8) },
+      { id: 105, desc: "Venda BodyTransform", type: "Entrada", value: 147, method: "PIX", date: d(11) },
+      { id: 106, desc: "Assinatura Hotmart", type: "Saída", value: 99, method: "Boleto", date: d(13) },
+      { id: 107, desc: "Investimento Meta Ads", type: "Saída", value: 2840, method: "Cartão", date: d(15) },
+      { id: 108, desc: "Venda HYPEX Method (combo)", type: "Entrada", value: 497, method: "Cartão", date: d(18) },
+      { id: 109, desc: "Comissão Kirvano", type: "Entrada", value: 213, method: "PIX", date: d(20) },
+      { id: 110, desc: "Ferramentas & Softwares", type: "Saída", value: 380, method: "Cartão", date: d(22) }
+    ],
+    salesHistory: sales.sort((a, b) => b.date.localeCompare(a.date)),
+    tasks: {
+      todo: [
+        { id: 1, title: "Criar campanha Meta Ads para o Q4", pri: "high", due: "", assignee: "Você" },
+        { id: 2, title: "Revisar relatório financeiro mensal", pri: "med", due: "", assignee: "Equipe" }
+      ],
+      doing: [{ id: 3, title: "Desenvolver landing page do Produto X", pri: "high", due: "", assignee: "Dev" }],
+      done: [{ id: 4, title: "Configurar integração Kiwify", pri: "low", due: "", assignee: "Você" }]
+    },
+    events: [
+      { id: 1, date: todayStr(), title: "Reunião estratégica semanal", cat: "meet" },
+      { id: 2, date: todayStr(), title: "Lançamento do Produto A", cat: "launch" }
+    ],
+    products: [
+      { id: 1, name: "HYPEX Method", niche: "Produtividade", price: 297, revenue: 18420, conv: 3.2 },
+      { id: 2, name: "FinanceX Pro", niche: "Finanças", price: 197, revenue: 12640, conv: 4.1 },
+      { id: 3, name: "BodyTransform", niche: "Emagrecimento", price: 147, revenue: 9870, conv: 5.3 }
+    ],
+    affiliations: [
+      { id: 1, platform: "Kiwify", commission: 40, sales: 28, profit: 4380 },
+      { id: 2, platform: "Kirvano", commission: 35, sales: 19, profit: 2850 }
+    ],
+    team: [
+      { id: 1, name: "Você", email: S.user.email || "voce@empresa.com", role: "Dono", sales: 89, revenue: 34200, commission: 0, status: "Ativo" },
+      { id: 2, name: "Ana Silva", email: "ana@empresa.com", role: "Gerente", sales: 34, revenue: 13200, commission: 1320, status: "Ativo" },
+      { id: 3, name: "Carlos Dev", email: "carlos@empresa.com", role: "Colaborador", sales: 18, revenue: 7020, commission: 702, status: "Ativo" }
+    ],
+    campaigns: [
+      { id: 1, name: "Black Friday Q4", platform: "Meta Ads", budget: 3200, spend: 2840, roi: 340, status: "Ativa" },
+      { id: 2, name: "Google Search Produto A", platform: "Google Ads", budget: 1500, spend: 1500, roi: 220, status: "Finalizada" },
+      { id: 3, name: "TikTok Awareness", platform: "TikTok Ads", budget: 800, spend: 420, roi: 0, status: "Pausada" }
+    ],
+    creatives: [
+      { id: 1, name: "Criativo-001-VSL", platform: "Meta Ads", revenue: 18240, roi: 340, roas: 4.2, conv: 3.8, status: "Ativo" },
+      { id: 2, name: "Criativo-002-IMG", platform: "Meta Ads", revenue: 9120, roi: 280, roas: 3.8, conv: 2.9, status: "Ativo" },
+      { id: 3, name: "Keyword-Brand", platform: "Google Ads", revenue: 12480, roi: 220, roas: 3.2, conv: 4.1, status: "Ativo" },
+      { id: 4, name: "TK-Reels-A", platform: "TikTok Ads", revenue: 4200, roi: 180, roas: 2.8, conv: 2.1, status: "Pausado" },
+      { id: 5, name: "Tab-Native-01", platform: "Taboola", revenue: 2880, roi: 140, roas: 2.2, conv: 1.4, status: "Ativo" }
+    ],
+    testProducts: [
+      { id: 1, name: "Programa Alpha", endsAt: Date.now() + ((2 * 24 + 14) * 3600 + 32 * 60) * 1000 },
+      { id: 2, name: "Curso Beta", endsAt: Date.now() + ((1 * 24 + 8) * 3600 + 11 * 60) * 1000 },
+      { id: 3, name: "Ebook Gamma", endsAt: Date.now() + (3 * 3600 + 45 * 60) * 1000 }
+    ],
+    integrations: Object.fromEntries(["meta", "analytics", "kirvano", "kiwify"].map((k) => [k, true]))
+  };
+}
+function isFresh() {
+  return !((S.transactions || []).length || (S.salesHistory || []).length || S.products.length || (S.tasks && S.tasks.todo.length) || (S.campaigns || []).length);
+}
+function loadDemoData() {
+  const d = demoSeed();
+  ["revenueTarget", "transactions", "salesHistory", "tasks", "events", "products", "affiliations", "team", "campaigns", "creatives", "testProducts", "integrations"].forEach((k) => { S[k] = d[k]; });
+  logAndTouch("Dados de exemplo carregados");
+  updateSidebarRevenue();
+  refreshNotifs();
+  renderPage(currentPage);
+  showToast("Dados de exemplo carregados — explore à vontade!", "ok");
+}
+function resetAllData() {
+  if (!confirm("Apagar TODOS os dados (financeiro, vendas, tarefas, equipe, produtos...) e começar do zero? Isso não pode ser desfeito.")) return;
+  const keep = { user: S.user, ui: S.ui, roles: S.roles, activeTabProducts: S.activeTabProducts, notifLastSeen: S.notifLastSeen };
+  S = Object.assign(defaultState(), keep);
+  S.revenueTarget = 0;
+  S.transactions = [];
+  S.salesHistory = [];
+  S.calDate = new Date();
+  audit("Dados zerados (reset manual)");
+  saveLocal();
+  pushCloudDebounced();
+  updateSidebarRevenue();
+  refreshNotifs();
+  renderPage("dashboard");
+  showToast("Tudo zerado. Recomeço limpo!", "ok");
+}
+
+let S = defaultState(); // tela de login: sempre zerada até identificar o usuário
+
+// ===== PERSISTÊNCIA LOCAL (escopo por usuário) =====
+const LS_KEY = "hypexwave.state.v1"; // LEGADO: somente leitura p/ migração one-time
 const LS_SESSION = "hypexwave.session";
 const LS_SBCFG = "hypexwave.supabase";
 
+// Cada conta tem seu PRÓPRIO estado no navegador — um usuário novo
+// nunca herda os dados de quem usou a máquina antes dele.
+function stateKeyFor(email) {
+  const e = String(email || "").trim().toLowerCase();
+  if (!e) return LS_KEY;
+  return "hypexwave.state.v1.u." + e.replace(/[^a-z0-9._@-]/g, "_");
+}
 function saveLocal() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { console.warn("saveLocal", e); }
+  try {
+    localStorage.setItem(stateKeyFor(S.user && S.user.email), JSON.stringify(S));
+  } catch (e) { console.warn("saveLocal", e); }
 }
 const saveLocalDebounced = debounce(saveLocal, 500);
-function loadLocal() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    S = Object.assign(defaultState(), parsed);
-    S.transactions = parsed.transactions && parsed.transactions.length ? parsed.transactions : seedTransactions();
-    S.salesHistory = parsed.salesHistory && parsed.salesHistory.length ? parsed.salesHistory : seedSales();
-    if (!parsed.ui) S.ui = defaultState().ui;
-    if (!parsed.roles || !parsed.roles.length) S.roles = defaultState().roles;
-    if (!parsed.creatives) S.creatives = defaultState().creatives;
-    if (!parsed.tasks) S.tasks = defaultState().tasks;
-  } catch (e) { console.warn("loadLocal", e); }
+function hydrateParsed(parsed) {
+  S = Object.assign(defaultState(), parsed);
+  S.transactions = Array.isArray(parsed.transactions) ? parsed.transactions : [];
+  S.salesHistory = Array.isArray(parsed.salesHistory) ? parsed.salesHistory : [];
+  if (!parsed.ui) S.ui = defaultState().ui;
+  if (!parsed.roles || !parsed.roles.length) S.roles = defaultState().roles;
+  if (!parsed.creatives) S.creatives = defaultState().creatives;
+  if (!parsed.tasks) S.tasks = defaultState().tasks;
+}
+// Carrega o estado DESTA conta; se ainda não existir, começa do ZERO ABSOLUTO.
+// Migração do estado antigo compartilhado DESATIVADA (decisão do dono):
+// NINGUÉM herda valores antigos — toda conta entra limpa.
+// Os dados antigos permanecem dormentes no navegador sob "hypexwave.state.v1"
+// e podem ser recuperados manualmente se um dia forem necessários.
+function loadUserState(email) {
+  let raw = null;
+  try { raw = localStorage.getItem(stateKeyFor(email)); } catch (e) { console.warn("loadUserState", e); }
+  if (raw) {
+    try { hydrateParsed(JSON.parse(raw)); return true; }
+    catch (e) { console.warn("loadUserState parse", e); }
+  }
+  S = defaultState(); // sem estado próprio → tudo zerado
+  return false;
 }
 
 // ===== AUDIT LOG =====
@@ -254,10 +313,14 @@ async function pullCloud(sbUser) {
     const { data, error } = await sb.from("app_data")
       .select("data,updated_at").eq("user_id", sbUser.id).maybeSingle();
     if (error) throw error;
-    let localTime = "";
-    try { localTime = JSON.parse(localStorage.getItem(LS_KEY) || "{}")._syncedAt || ""; } catch (e) {}
+    // Timestamp local DESTE usuário (S já contém o estado certo,
+    // carregado por loadUserState antes da sincronização).
+    const localTime = (S && S._syncedAt) || "";
     if (data && data.data && data.updated_at >= (localTime || "")) {
-      S = Object.assign(defaultState(), data.data);
+      const currentUser = S.user;
+      hydrateParsed(data.data);
+      // Identidade vem SEMPRE da sessão viva (fonte autoritativa)
+      if (currentUser && currentUser.id) S.user = Object.assign({}, S.user, currentUser);
       saveLocal();
     } else {
       const payload = JSON.parse(JSON.stringify(S));
@@ -367,6 +430,7 @@ async function ensureProfile(sb, user, name) {
 }
 async function onCloudSession(session, user) {
   const metaName = user.user_metadata && (user.user_metadata.name || user.user_metadata.full_name);
+  loadUserState(user.email); // estado DESTA conta ou ZERADO — nunca dados de outro usuário
   S.user = {
     id: user.id,
     email: user.email,
@@ -380,6 +444,7 @@ async function onCloudSession(session, user) {
   enterApp();
 }
 function startAppLocal(em) {
+  loadUserState(em); // carrega o estado desta conta ou zera tudo (usuário novo)
   const known = S.team.find((m) => m.email === em);
   S.user = {
     id: null,
@@ -423,13 +488,13 @@ function updateSidebarRevenue() {
   const pct = Math.min((income / (S.revenueTarget || 100000)) * 100, 100);
   const el = $("rvtotal"), em = $("rvmeta"), bar = $("rvbf");
   if (el) el.textContent = fmtBRL(income);
-  if (em) em.textContent = "Meta: " + fmtBRL(0) + " → " + fmtBRL(S.revenueTarget);
+  if (em) em.textContent = S.revenueTarget > 0 ? "Meta: " + fmtBRL(S.revenueTarget) + " — " + pct.toFixed(0) + "%" : "Defina sua meta de faturamento";
   if (bar) setTimeout(() => { bar.style.width = pct.toFixed(1) + "%"; }, 250);
 }
 window.addEventListener("load", async () => {
-  loadLocal();
   applyUiPrefs();
   loginInfoText();
+  // GOVERNANÇA DE DADOS: nada é carregado antes de saber QUEM é o usuário.
   if (getCfg()) {
     try {
       const sb = await getSB();
@@ -445,6 +510,7 @@ window.addEventListener("load", async () => {
     const sess = JSON.parse(localStorage.getItem(LS_SESSION) || "null");
     if (sess && sess.email && AUTH_EMAILS.includes(sess.email)) {
       const em = sess.email;
+      loadUserState(em); // estado DESTE usuário — ou zero absoluto, se novo
       const known = S.team.find((m) => m.email === em);
       S.user = { id: null, email: em, name: known ? known.name : em.split("@")[0], role: known ? String(known.role).toUpperCase() : "DONO", avatar: ((known ? known.name[0] : em[0]) || "?").toUpperCase() };
       enterApp();
@@ -641,7 +707,7 @@ function pgDashboard(mc) {
 
   mc.innerHTML =
     '<div class="sh flex aic jb"><div><div class="stitle">Dashboard <span>— Visão Geral do Negócio</span></div><div class="ssub">' + greet + ", " + esc(S.user.name || "empreendedor") + " — tudo atualizado agora</div></div>" +
-    '<button class="bg" onclick="editGoal()"><i data-lucide="target"></i> Definir meta</button></div>' +
+    '<div class="flex gap2">' + (isFresh() ? '<button class="bp" onclick="loadDemoData()"><i data-lucide="sparkles"></i> Carregar exemplo</button>' : "") + '<button class="bg" onclick="editGoal()"><i data-lucide="target"></i> Definir meta</button></div></div>' +
     '<div class="g4 ms" id="kpiGrid"></div>' +
     '<div class="g2 ms"><div class="gc"><div class="chead"><span class="ctitle">Receita vs Despesas</span><span class="txxs txm">6 meses</span></div><div class="chart-container" style="height:200px"><canvas id="chartRevExp"></canvas></div></div>' +
     '<div class="gc"><div class="chead"><span class="ctitle">Fluxo de Caixa Acumulado</span><span class="txxs txm">Por lançamento</span></div><div class="chart-container" style="height:200px"><canvas id="chartCash"></canvas></div></div></div>' +
@@ -666,8 +732,19 @@ function pgDashboard(mc) {
   (S.salesHistory || []).slice(0, 6).forEach((r) => {
     tb.innerHTML += "<tr><td>" + esc(r.product) + "</td><td style=\"color:var(--ok);font-family:'Space Mono',monospace\">" + fmtBRL(r.value) + '</td><td><span class="' + (r.status === "Pago" ? "bok" : "bwarn") + ' b">' + r.status + "</span></td><td style=\"color:var(--tx3)\">" + r.date.slice(0, 10) + "</td></tr>";
   });
+if (!(S.salesHistory || []).length) $("recentSales").innerHTML = '<tr><td colspan="4"><div class="empty-state"><div class="es-ico"><i data-lucide="receipt-text"></i></div>Nenhuma venda registrada ainda.</div></td></tr>';
   const alerts = computeAlerts();
   const al = $("alertsList");
+  if (isFresh()) {
+    const steps = [
+      { ico: "wallet", msg: "Lance sua primeira entrada ou saída no Financeiro", go: "navTo('financial')" },
+      { ico: "package", msg: "Cadastre seus produtos na aba Produtos", go: "navTo('products')" },
+      { ico: "target", msg: "Defina sua meta de faturamento", go: "editGoal()" },
+      { ico: "sparkles", msg: "Ou carregue dados de exemplo para explorar a plataforma", go: "loadDemoData()" }
+    ];
+    al.innerHTML = '<div style="font-size:9.5px;color:var(--tx3);margin-bottom:9px;font-family:var(--f-mono);letter-spacing:.16em">COMECE POR AQUI</div>' +
+      steps.map((st, idx) => '<div onclick="' + st.go + '" style="cursor:pointer;padding:11px 12px;margin-bottom:7px;background:var(--surface-hi);border:1px solid var(--bd);border-radius:11px;font-size:12px;display:flex;gap:10px;align-items:center"><span style="color:var(--c);display:flex"><i data-lucide="' + st.ico + '"></i></span><span><b>' + (idx + 1) + '.</b> ' + st.msg + '</span></div>').join("");
+  }
   if (!alerts.length) al.innerHTML = '<div class="empty-state"><div class="es-ico"><i data-lucide="sparkles"></i></div>Nenhum alerta. Tudo sob controle!</div>';
   else alerts.forEach((a) => {
     al.innerHTML += '<div style="padding:10px 12px;margin-bottom:7px;background:var(--surface-hi);border:1px solid var(--bd);border-radius:11px;font-size:12px;display:flex;gap:10px;align-items:center"><span style="color:var(--tx3);display:flex"><i data-lucide="' + a.icon + '"></i></span><span>' + esc(a.msg) + "</span></div>";
@@ -732,6 +809,7 @@ function renderKanban() {
     });
     const cnt = $("cnt-" + col);
     if (cnt) cnt.textContent = (S.tasks[col] || []).length;
+    if (el && !(S.tasks[col] || []).length) el.innerHTML = '<div class="empty-state" style="padding:22px 6px;font-size:11.5px">Nada aqui ainda.<br>Arraste cartões para cá.</div>';
   });
   icons();
 }
@@ -917,6 +995,7 @@ function pgVitrine(mc) {
     ).join("") + "</div>" +
     '<div class="gc mt4"><div class="chead"><span class="ctitle"><i data-lucide="hourglass"></i>&nbsp;Produtos em Teste (validação de 3 dias)</span><button class="bg" id="addTestBtn">+ Enviar para teste</button></div>' +
     '<div class="g3 mt2" id="testGrid"></div></div>';
+  if (!S.products.length) { const g0 = mc.querySelector(".g3"); if (g0) g0.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="es-ico"><i data-lucide="package"></i></div>Nenhum produto ainda.<br>Cadastre em Produtos para vê-los aqui.</div>'; }
   $("addTestBtn").addEventListener("click", addTestProduct);
   renderTestGrid();
   vitrineTimer = setInterval(renderTestGrid, 1000);
@@ -1123,6 +1202,7 @@ function pgTeam(mc) {
       '<td><span class="' + (m.status === "Ativo" ? "bok" : "bwarn") + ' b">' + esc(m.status || "Ativo") + "</span></td>" +
       "<td>" + (m.role !== "Dono" ? '<button class="bg danger" data-mdel="' + m.id + '" style="font-size:10px;padding:3px 8px">Remover</button>' : "") + "</td></tr>";
   });
+  if (!S.team.length) tt.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="es-ico"><i data-lucide="users"></i></div>Nenhum membro ainda.<br>Adicione a primeira pessoa da sua equipe.</div></td></tr>';
   tt.querySelectorAll("[data-mdel]").forEach((b) => b.addEventListener("click", () => removeMember(Number(b.dataset.mdel))));
 }
 async function sendInvite() {
@@ -1158,7 +1238,8 @@ function pgIndividual(mc) {
     '<div class="flex gap2 mb4" style="flex-wrap:wrap">' + S.team.map((t, i) => '<button class="bg" data-member="' + i + '" id="mbtn' + i + '">' + esc(t.name) + "</button>").join("") + "</div>" +
     '<div id="memberReport"></div>';
   mc.querySelectorAll("[data-member]").forEach((b) => b.addEventListener("click", () => showMemberReport(Number(b.dataset.member))));
-  showMemberReport(0);
+  if (!S.team.length) $("memberReport").innerHTML = '<div class="empty-state"><div class="es-ico"><i data-lucide="user"></i></div>Sem membros na equipe.<br>Adicione pessoas em Equipe para gerar relatórios.</div>';
+  else showMemberReport(0);
 }
 function showMemberReport(i) {
   document.querySelectorAll("[id^=mbtn]").forEach((b) => { b.style.background = ""; b.style.borderColor = ""; b.style.color = ""; });
@@ -1213,6 +1294,7 @@ function pgAds(mc) {
     '<td><span class="' + (c.status === "Ativo" ? "bok" : "bwarn") + ' b">' + c.status + "</span></td>" +
     '<td><button class="bg danger" data-crdel="' + c.id + '" style="font-size:10px;padding:3px 8px">×</button></td></tr>'
   ).join("");
+  if (!S.creatives.length) ct.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="es-ico"><i data-lucide="megaphone"></i></div>Nenhum criativo ainda. Adicione o primeiro!</div></td></tr>';
   ct.querySelectorAll("[data-crdel]").forEach((b) => b.addEventListener("click", () => delCreative(Number(b.dataset.crdel))));
   setTimeout(() => {
     mkChart("chartGrowth", "bar", S.creatives.map((c) => c.name), [
@@ -1558,9 +1640,11 @@ function pgAdmin(mc) {
     S.team.map((t) => "<tr><td>" + esc(t.name) + "</td><td>" + esc(t.role) + "</td><td style=\"color:var(--tx3)\">Hoje</td>" +
       '<td><span class="' + (t.status === "Ativo" ? "bok" : "bwarn") + ' b">' + esc(t.status || "Ativo") + "</span></td></tr>").join("") +
     "</tbody></table></div>" +
-    '<div class="gc tbl-wrap"><div class="chead"><span class="ctitle">Logs de Auditoria</span><button class="bg" style="font-size:10px" id="clearAuditBtn">Limpar</button></div>' +
+    '<div class="gc tbl-wrap"><div class="chead"><span class="ctitle">Logs de Auditoria</span><button class="bg" style="font-size:10px" id="clearAuditBtn">Limpar</button><button class="bg danger" style="font-size:10px;margin-left:6px" id="resetAllBtn"><i data-lucide="rotate-ccw"></i> Zerar dados</button></div>' +
     '<div style="max-height:330px;overflow-y:auto" id="auditList"></div></div></div>';
   $("clearAuditBtn").addEventListener("click", clearAudit);
+  $("resetAllBtn").addEventListener("click", resetAllData);
+  if (!S.team.length) { const tb0 = mc.querySelector("tbody"); if (tb0) tb0.innerHTML = '<tr><td colspan="4"><div class="empty-state">Nenhum usuário registrado.</div></td></tr>'; }
   renderAudit();
 }
 function renderAudit() {
@@ -1618,7 +1702,8 @@ function computeAlerts() {
   const out = [];
   const fm = finMetrics();
   const goalPct = (fm.income / (S.revenueTarget || 1)) * 100;
-  if (goalPct < 100) out.push({ icon: "target", msg: "Meta em " + goalPct.toFixed(1) + "% — faltam " + fmtBRL(Math.max(S.revenueTarget - fm.income, 0)) });
+  if (!S.revenueTarget) out.push({ icon: "target", msg: "Defina sua meta de faturamento para acompanhar o progresso" });
+  else if (goalPct < 100) out.push({ icon: "target", msg: "Meta em " + goalPct.toFixed(1) + "% — faltam " + fmtBRL(Math.max(S.revenueTarget - fm.income, 0)) });
   else out.push({ icon: "sparkles", msg: "Meta batida! Receita acumulada de " + fmtBRL(fm.income) });
   const overdue = [];
   ["todo", "doing"].forEach((c) => (S.tasks[c] || []).forEach((t) => { if (t.due && daysDiff(t.due) < 0) overdue.push(t.title); }));
