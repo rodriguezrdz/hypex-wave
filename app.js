@@ -428,8 +428,21 @@ async function doLogin() {
 }
 async function doGLogin() {
   if (!getCfg()) { showToast("🔐 Login com Google requer o Supabase conectado — entre e abra Banco de Dados.", "warn"); return; }
-  const sb = await getSB();
-  await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + location.pathname } });
+  try {
+    const sb = await getSB();
+    const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + location.pathname } });
+    if (error) throw error;
+    // Sucesso → navegador é redirecionado ao Google automaticamente.
+  } catch (e) {
+    const msg = String((e && e.message) || e);
+    let amigavel = "Não foi possível iniciar o login com Google. Tente novamente.";
+    if (/provider/i.test(msg) && /(not|unsupported|disabled|invalid)/i.test(msg)) {
+      amigavel = "Login com Google ainda não está ativo no Supabase (Authentication → Providers → Google).";
+    } else if (/redirect|url/i.test(msg)) {
+      amigavel = "Endereço não autorizado — adicione este site em Authentication → URL Configuration no Supabase.";
+    }
+    lerr(amigavel);
+  }
 }
 async function ensureProfile(sb, user, name) {
   try {
