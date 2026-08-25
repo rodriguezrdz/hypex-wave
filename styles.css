@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    HYPEX WAVE v3 — DESIGN SYSTEM "OBSIDIAN AURA"
    Contrato visual: _design/design-tokens.md (fonte única de verdade)
    Cobertura: _design/class-inventory.md (205 classes + estados dinâmicos)
@@ -125,7 +125,7 @@ b,strong{font-weight:700}
           mask-image:radial-gradient(ellipse 95% 78% at 50% -4%,#000 18%,transparent 72%);
 }
 .fx-grain{
-  position:absolute;inset:0;opacity:.42;mix-blend-mode:overlay;
+  position:absolute;inset:0;opacity:.15;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
 }
 .fx-vignette{
@@ -250,8 +250,6 @@ body.no-glass .rvc{
   padding:52px 56px;
   border-right:1px solid var(--bd);
   background:linear-gradient(158deg,rgba(10,16,28,.44),rgba(5,8,14,.62));
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
 }
 .brand-panel::before{ /* aurora congelada no canto superior */
   content:'';position:absolute;top:-220px;left:-160px;width:640px;height:640px;
@@ -340,11 +338,11 @@ body.no-glass .rvc{
 .lcard{
   position:relative;width:min(430px,100%);
   padding:36px 34px 28px;
-  background:var(--bgc);
+  background:rgba(11,16,27,.86);
   border:1px solid var(--bdh);border-radius:var(--r-lg);
   box-shadow:var(--sh-pop);
-  backdrop-filter:blur(24px);
-  -webkit-backdrop-filter:blur(24px);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
 }
 .lcard::before{ /* aresta luminosa superior — vidro fino 1px */
   content:'';position:absolute;top:-1px;left:14%;right:14%;height:1px;
@@ -461,10 +459,10 @@ body.no-glass .rvc{
 #sb{
   position:fixed;top:0;left:0;bottom:0;width:var(--sw);z-index:100;
   display:flex;flex-direction:column;overflow:hidden;
-  background:var(--bgc);
+  background:rgba(11,16,27,.86);
   border-right:1px solid var(--bd);
-  backdrop-filter:blur(22px);
-  -webkit-backdrop-filter:blur(22px);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
 }
 .sbh{
   display:flex;align-items:center;gap:11px;flex-shrink:0;
@@ -583,8 +581,6 @@ body.no-glass .rvc{
 .sb-backdrop{
   position:fixed;inset:0;z-index:99;
   background:rgba(2,4,8,.62);
-  backdrop-filter:blur(3px);
-  -webkit-backdrop-filter:blur(3px);
   opacity:0;pointer-events:none;transition:opacity .32s;
 }
 .sb-backdrop.show{opacity:1;pointer-events:auto}
@@ -596,8 +592,8 @@ body.no-glass .rvc{
   padding:0 22px;
   background:rgba(6,10,17,.66);
   border-bottom:1px solid var(--bd);
-  backdrop-filter:blur(22px);
-  -webkit-backdrop-filter:blur(22px);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
 }
 #mobile-hamburger{
   display:none;width:36px;height:36px;flex-shrink:0;
@@ -738,11 +734,9 @@ body.no-glass .rvc{
 .gc{
   position:relative;overflow:hidden;
   padding:20px;
-  background:var(--bgc);
+  background:rgba(11,16,27,.86);
   border:1px solid var(--bd);border-radius:var(--r-lg);
   box-shadow:var(--sh-card);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
   transition:border-color .3s,transform .3s var(--ease),box-shadow .3s;
 }
 .gc::before{
@@ -1036,8 +1030,6 @@ input[type="checkbox"].fi,input[type="radio"].fi{width:auto}
   display:flex;align-items:center;justify-content:center;
   padding:20px;
   background:rgba(2,4,8,.72);
-  backdrop-filter:blur(6px);
-  -webkit-backdrop-filter:blur(6px);
   opacity:0;pointer-events:none;
   transition:opacity .28s;
 }
@@ -1049,8 +1041,8 @@ input[type="checkbox"].fi,input[type="radio"].fi{width:auto}
   background:rgba(11,16,26,.94);
   border:1px solid var(--bdh);border-radius:var(--r-lg);
   box-shadow:var(--sh-pop);
-  backdrop-filter:blur(24px);
-  -webkit-backdrop-filter:blur(24px);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
   transform:translateY(16px) scale(.97);
   transition:transform .32s var(--ease);
 }
@@ -1082,8 +1074,8 @@ input[type="checkbox"].fi,input[type="radio"].fi{width:auto}
   background:rgba(10,15,24,.96);
   border:1px solid var(--bdh);border-radius:12px;
   box-shadow:var(--sh-pop);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
   opacity:0;pointer-events:none;
   transform:translate(-50%,16px);
   transition:opacity .3s var(--ease),transform .3s var(--ease);
@@ -1132,8 +1124,6 @@ input[type="checkbox"].fi,input[type="radio"].fi{width:auto}
   margin-bottom:8px;padding:13px;
   background:linear-gradient(180deg,rgba(18,24,38,.82),rgba(12,16,26,.88));
   border:1px solid var(--bd);border-radius:13px;
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
   cursor:grab;user-select:none;
   transition:all .2s var(--ease);
 }
@@ -1199,10 +1189,8 @@ input[type="checkbox"].fi,input[type="radio"].fi{width:auto}
 .intcard{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:16px;
-  background:var(--bgc);
+  background:rgba(11,16,27,.86);
   border:1px solid var(--bd);border-radius:var(--r-md);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
   transition:border-color .25s,transform .25s var(--ease);
 }
 .intcard:hover{border-color:var(--bdh);transform:translateY(-2px)}
@@ -1226,10 +1214,8 @@ input[type="checkbox"].fi,input[type="radio"].fi{width:auto}
 .fnode{
   position:absolute;width:132px;
   padding:13px 10px;text-align:center;user-select:none;
-  background:rgba(10,15,24,.72);
+  background:rgba(10,15,24,.88);
   border:1px solid var(--bdh);border-radius:13px;
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
   cursor:grab;
   transition:border-color .2s,box-shadow .2s,transform .2s;
 }
@@ -1256,8 +1242,6 @@ input[type="checkbox"].fi,input[type="radio"].fi{width:auto}
   background:rgba(10,15,24,.85);
   border:1px solid rgba(0,229,255,.3);
   box-shadow:0 14px 40px -14px rgba(0,229,255,.35),0 20px 50px -20px rgba(0,0,0,.9);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
   cursor:pointer;
   transition:transform .3s var(--ease),border-color .3s,box-shadow .3s;
   animation:pulseGlow 3.4s infinite;
@@ -1276,8 +1260,8 @@ input[type="checkbox"].fi,input[type="radio"].fi{width:auto}
   background:rgba(9,13,21,.93);
   border:1px solid var(--bdh);border-radius:var(--r-lg);
   box-shadow:var(--sh-pop);
-  backdrop-filter:blur(26px);
-  -webkit-backdrop-filter:blur(26px);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
   opacity:0;transform:translateY(14px) scale(.98);
   pointer-events:none;
   transition:opacity .35s var(--ease),transform .35s var(--ease);
@@ -1441,8 +1425,8 @@ input[type="checkbox"].fi,input[type="radio"].fi{width:auto}
     background:rgba(9,13,21,.93);
     border:1px solid var(--bdh);border-radius:18px;
     box-shadow:var(--sh-pop);
-    backdrop-filter:blur(24px);
-    -webkit-backdrop-filter:blur(24px);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
   }
   .bnav-item{
     position:relative;
@@ -1523,3 +1507,17 @@ input[type="checkbox"].fi,input[type="radio"].fi{width:auto}
   .stagger>*{animation:none!important;opacity:1!important;transform:none!important}
   html{scroll-behavior:auto}
 }
+/* ============================================================
+   25. TIERS DE PERFORMANCE (governador adaptativo do fx.js)
+   html.fx-perf-1 = modo eco · html.fx-perf-2 = modo mínimo
+   ============================================================ */
+html.fx-perf-1 .lcard,
+html.fx-perf-1 #sb,
+html.fx-perf-1 #tb,
+html.fx-perf-1 .mbox,
+html.fx-perf-1 #toast,
+html.fx-perf-1 #aimod,
+html.fx-perf-1 #mobile-bottomnav{
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+html.fx-perf-1 #aiorb{box-shadow:0 10px 26px -12px rgba(0,229,255,.3)}
+html.fx-perf-2 *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;text-shadow:none!important}

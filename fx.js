@@ -14,7 +14,7 @@
 
   /* ============================== UTILIDADES ============================== */
 
-  var VERSION = '3.0.0';
+  var VERSION = '3.1.0';
 
   /** Estado global compartilhado entre módulos (flags baratas, sem layout). */
   var state = {
@@ -80,12 +80,21 @@
 
     var BREATH_MS = 14000;         // ciclo de respiração ~14s
 
+    /* PERF v3.1: render em baixa resolução + limitador de FPS.
+       As ondas são gradientes suaves — o upscale CSS é imperceptível e
+       economiza ~4-6× de fill-rate na GPU. O governador ajusta via setTier. */
+    var scale = 0.5;               // fração da viewport usada como backing store
+    var minFrameMs = 1000 / 30;    // teto de 30fps (movimento lento, basta)
+    var ribbonsActive = RIBBONS.length;
+    var frozen = false;            // tier 2: quadro estático permanente
+    var lastDrawTs = -1;
+
     function buildGradients() {
       gradients.length = 0;
       for (var i = 0; i < RIBBONS.length; i++) {
         var rb = RIBBONS[i];
         // Gradiente horizontal: transparente → cor → tom claro → cor → transparente.
-        var gr = ctx.createLinearGradient(0, 0, W, 0);
+        var gr = ctx.createLinearGradient(0, 0, canvas.width, 0);
         gr.addColorStop(0.00, 'rgba(' + rb.r + ',' + rb.g + ',' + rb.b + ',0)');
         gr.addColorStop(0.22, 'rgba(' + rb.r + ',' + rb.g + ',' + rb.b + ',0.85)');
         gr.addColorStop(0.50, 'rgba(' +
@@ -98,15 +107,16 @@
 
     function setSize() {
       if (!canvas) return;
-      DPR = clamp(window.devicePixelRatio || 1, 1, 2);
+      DPR = 1;                                       // backing próprio já é reduzido
       W = Math.max(1, window.innerWidth);
       H = Math.max(1, window.innerHeight);
-      canvas.width = Math.round(W * DPR);
-      canvas.height = Math.round(H * DPR);
+      canvas.width = Math.max(160, Math.round(W * scale));
+      canvas.height = Math.max(120, Math.round(H * scale));
       canvas.style.width = W + 'px';
       canvas.style.height = H + 'px';
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       buildGradients();
+      lastDrawTs = -1;
     }
 
     /** Desenha 1 frame. Escalar puro — nenhuma alocação de objeto/array aqui. */
@@ -115,41 +125,41 @@
       var breath = Math.sin(sec * (Math.PI * 2 / (BREATH_MS / 1000)));
       var peak = loginVisible ? 0.35 : 0.16;
 
-      ctx.clearRect(0, 0, W, H);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.globalCompositeOperation = 'lighter';
 
-      for (var i = 0; i < RIBBONS.length; i++) {
+      for (var i = 0; i < ribbonsActive && i < RIBBONS.length; i++) {
         var rb = RIBBONS[i];
         var alpha = peak * (0.55 + 0.45 * Math.sin(breath * Math.PI * 2 + i * 2.09));
         if (alpha < 0.02) continue;
         ctx.globalAlpha = alpha;
         ctx.fillStyle = gradients[i];
 
-        var ampH = rb.amp * H;
-        var cy = H * (0.32 + 0.18 * i);                       // faixas verticais distintas
+        var ampH = rb.amp * canvas.height;
+        var cy = canvas.height * (0.32 + 0.18 * i);           // faixas verticais distintas
         var basePhase = rb.phase + ts * rb.speed;
 
-        var step = Math.max(14, W / 72);
+        var step = Math.max(8, canvas.width / 60);
         var first = true;
         var x, u, yMid, th, yTop, yBot;
 
         // Banda superior (esquerda → direita)
-        for (x = -step; x <= W + step; x += step) {
-          u = x / W;
+        for (x = -step; x <= canvas.width + step; x += step) {
+          u = x / canvas.width;
           yMid = cy +
             ampH * Math.sin(u * rb.wl * Math.PI * 2 + basePhase) +
             ampH * 0.35 * Math.sin(u * rb.wl * 3.7 * Math.PI * 2 - ts * rb.speed * 1.6 + rb.phase);
-          th = rb.thick * H * (0.65 + 0.35 * Math.sin(u * rb.wl * 1.6 * Math.PI * 2 + ts * rb.speed * 0.8 + rb.phase * 2));
+          th = rb.thick * canvas.height * (0.65 + 0.35 * Math.sin(u * rb.wl * 1.6 * Math.PI * 2 + ts * rb.speed * 0.8 + rb.phase * 2));
           yTop = yMid - th * 0.5;
           if (first) { ctx.moveTo(x, yTop); first = false; } else { ctx.lineTo(x, yTop); }
         }
         // Banda inferior (direita → esquerda, fechando o path)
-        for (x = W + step; x >= -step; x -= step) {
-          u = x / W;
+        for (x = canvas.width + step; x >= -step; x -= step) {
+          u = x / canvas.width;
           yMid = cy +
             ampH * Math.sin(u * rb.wl * Math.PI * 2 + basePhase) +
             ampH * 0.35 * Math.sin(u * rb.wl * 3.7 * Math.PI * 2 - ts * rb.speed * 1.6 + rb.phase);
-          th = rb.thick * H * (0.65 + 0.35 * Math.sin(u * rb.wl * 1.6 * Math.PI * 2 + ts * rb.speed * 0.8 + rb.phase * 2));
+          th = rb.thick * canvas.height * (0.65 + 0.35 * Math.sin(u * rb.wl * 1.6 * Math.PI * 2 + ts * rb.speed * 0.8 + rb.phase * 2));
           yBot = yMid + th * 0.5;
           ctx.lineTo(x, yBot);
         }
@@ -160,16 +170,20 @@
     }
 
     function canRun() {
-      return !!ctx && !document.hidden && motionOK();
+      return !!ctx && !document.hidden && !frozen && motionOK();
     }
 
     function frame(ts) {
       rafId = 0;
       if (!canRun()) return;
       lastTs = ts;
-      // Checagem barata de login a cada ~90 frames (~1.5s) como fallback do observer.
-      if ((++frameTick % 90) === 0) refreshLogin();
-      draw(ts);
+      // Checagem barata de login a cada ~60 ticks (~2s) como fallback do observer.
+      if ((++frameTick % 60) === 0) refreshLogin();
+      // Limitador de FPS: movimento lento dispensa 60Hz.
+      if (lastDrawTs < 0 || ts - lastDrawTs >= minFrameMs) {
+        lastDrawTs = ts;
+        draw(ts);
+      }
       rafId = requestAnimationFrame(frame);
     }
 
@@ -206,6 +220,16 @@
           if (!canRun()) draw(lastTs || 1200);
         } catch (_) { /* nunca propagar erro de resize */ }
       }, 180);
+    }
+
+    /** Tier de performance (governador): 0 cheio · 1 eco · 2 mínimo estático. */
+    function setTier(t) {
+      if (t === 2) { frozen = true; pauseStatic(); return; }
+      frozen = false;
+      if (t === 1) { scale = 0.35; minFrameMs = 1000 / 22; ribbonsActive = 2; }
+      else { scale = 0.5; minFrameMs = 1000 / 30; ribbonsActive = RIBBONS.length; }
+      if (canvas) setSize();
+      if (motionOK()) ensureLoop(); else pauseStatic();
     }
 
     function start() {
@@ -247,6 +271,7 @@
       label: 'AuroraCanvas',
       start: start,
       stop: stop,
+      setTier: setTier,
       /** Redesenho estático manual (ex.: pós-troca de tema). */
       repaint: function () { if (ctx) draw(lastTs || 1200); },
       /** Força re-leitura do estado login/app. */
@@ -672,6 +697,75 @@
     return { label: 'PageTransition', start: start, stop: stop, onMainMutated: onMainMutated };
   })();
 
+  /* ==========================================================================
+     MÓDULO 6 — Performance Governor
+     Mede o FPS real do navegador em janelas de ~1.4s e degrada camadas caras
+     sob pressão: T0 cheio → T1 eco (sem tilt/magnetic, aurora leve) →
+     T2 mínimo (aurora congelada). Recuperação com histerese (4 janelas boas).
+     Hardware modesto (deviceMemory/cores baixos) já nasce em T1.
+     ======================================================================== */
+  var governor = (function () {
+    var tier = 0;
+    var rafId = 0, frames = 0, winStart = 0;
+    var badStreak = 0, goodStreak = 0;
+    var WINDOW_MS = 1400, DEGRADE_BELOW = 42, UPGRADE_ABOVE = 56, GOOD_TO_UPGRADE = 4;
+
+    function hwWeak() {
+      try {
+        return !!(navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+               !!(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+      } catch (_) { return false; }
+    }
+
+    function apply(t) {
+      if (t === tier) return;
+      tier = t;
+      var de = document.documentElement;
+      de.classList.remove('fx-perf-1', 'fx-perf-2');
+      try {
+        if (t === 1) de.classList.add('fx-perf-1');
+        else if (t === 2) de.classList.add('fx-perf-2');
+        aurora.setTier(t);
+        if (t === 0) { tilt.start(); magnetic.start(); }
+        else { tilt.stop(); magnetic.stop(); }
+      } catch (_) { /* isolado */ }
+    }
+
+    function loop(ts) {
+      rafId = 0;
+      frames++;
+      if (!winStart) winStart = ts;
+      var elapsed = ts - winStart;
+      if (elapsed >= WINDOW_MS) {
+        var fps = (frames * 1000) / elapsed;
+        frames = 0; winStart = ts;
+        if (fps < DEGRADE_BELOW) {
+          badStreak++; goodStreak = 0;
+          if (badStreak >= 2 && tier < 2) { apply(tier + 1); badStreak = 0; }
+        } else if (fps > UPGRADE_ABOVE && tier > 0) {
+          goodStreak++; badStreak = 0;
+          if (goodStreak >= GOOD_TO_UPGRADE) { apply(tier - 1); goodStreak = 0; }
+        } else if (badStreak > 0) {
+          badStreak--;
+        }
+      }
+      if (motionOK() && !state.destroyed) rafId = requestAnimationFrame(loop);
+    }
+
+    function start() {
+      if (rafId || !motionOK()) return;
+      if (hwWeak()) apply(1);                 // máquina modesta: nasce em eco
+      winStart = 0; frames = 0;
+      rafId = requestAnimationFrame(loop);
+    }
+
+    function stop() {
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+    }
+
+    return { label: 'PerformanceGovernor', start: start, stop: stop, apply: apply };
+  })();
+
   /* ============================ FLAGS GLOBAIS ============================= */
 
   var reducedMQ = null;      // MediaQueryList de prefers-reduced-motion
@@ -747,6 +841,17 @@
     // Módulo 2 — observers de dados (dispara 1ª varredura + no load).
     try { countUp.start(); }
     catch (err) { safeWarn('CountUp', err); }
+
+    // Módulo 6 — governador adaptativo: mede FPS e degrada sozinho.
+    try { governor.start(); }
+    catch (err) { safeWarn('PerformanceGovernor', err); }
+
+    // Charts mais leves: corta animações longas do Chart.js globalmente.
+    try {
+      if (window.Chart && window.Chart.defaults && window.Chart.defaults.animation) {
+        window.Chart.defaults.animation.duration = 300;
+      }
+    } catch (_) {}
   }
 
   function safeWarn(module, err) {
@@ -765,6 +870,7 @@
     try { tilt.stop(); } catch (_) {}
     try { magnetic.stop(); } catch (_) {}
     try { page.stop(); } catch (_) {}
+    try { governor.stop(); } catch (_) {}
     try { unwatchGlobalFlags(); } catch (_) {}
 
     state.destroyed = false;   // permite re-init limpo (hot-reload)
@@ -785,7 +891,9 @@
     /** M4: botões magnéticos (start/stop). */
     magnetic: magnetic,
     /** M5: transição de página (onMainMutated p/ uso manual). */
-    page: page
+    page: page,
+    /** M6: governador de performance (start/stop/apply). */
+    governor: governor
   };
 
   /* Auto-inicialização: imediata ou no DOMContentLoaded. */
