@@ -162,20 +162,25 @@ function resetAllData() {
 
 let S = defaultState(); // tela de login: sempre zerada até identificar o usuário
 
-// ===== PERSISTÊNCIA LOCAL (escopo por usuário) =====
-const LS_KEY = "hypexwave.state.v1"; // LEGADO: somente leitura p/ migração one-time
+// ===== PERSISTÊNCIA LOCAL (escopo por usuário · NAMESPACE v2 / LANÇAMENTO) =====
+const STATE_FMT = 3;                 // selo de formato atual — nuvem rejeita estados antigos
+const LS_KEY = "hypexwave.state.v1"; // LEGADO v1: dormente, nunca mais lido
 const LS_SESSION = "hypexwave.session";
 const LS_SBCFG = "hypexwave.supabase";
 
 // Cada conta tem seu PRÓPRIO estado no navegador — um usuário novo
 // nunca herda os dados de quem usou a máquina antes dele.
+// LANÇAMENTO DO ZERO: com o namespace v2, TODAS as contas existentes
+// entram zeradas na primeira visita à nova versão; dados antigos ficam
+// dormentes nas chaves v1 do navegador (recuperáveis manualmente).
 function stateKeyFor(email) {
   const e = String(email || "").trim().toLowerCase();
   if (!e) return LS_KEY;
-  return "hypexwave.state.v1.u." + e.replace(/[^a-z0-9._@-]/g, "_");
+  return "hypexwave.state.v2.u." + e.replace(/[^a-z0-9._@-]/g, "_");
 }
 function saveLocal() {
   try {
+    S._fmt = STATE_FMT;
     localStorage.setItem(stateKeyFor(S.user && S.user.email), JSON.stringify(S));
   } catch (e) { console.warn("saveLocal", e); }
 }
@@ -295,6 +300,7 @@ async function pushCloud() {
   setSync("saving");
   try {
     const payload = JSON.parse(JSON.stringify(S));
+    payload._fmt = STATE_FMT;
     payload._syncedAt = new Date().toISOString();
     const { error } = await sb.from("app_data")
       .upsert({ user_id: S.user.id, data: payload, updated_at: payload._syncedAt }, { onConflict: "user_id" });
@@ -316,7 +322,10 @@ async function pullCloud(sbUser) {
     // Timestamp local DESTE usuário (S já contém o estado certo,
     // carregado por loadUserState antes da sincronização).
     const localTime = (S && S._syncedAt) || "";
-    if (data && data.data && data.updated_at >= (localTime || "")) {
+    // LANÇAMENTO DO ZERO: linha da nuvem sem o selo de formato atual é
+    // estado pré-lançamento → IGNORADA e sobrescrita pelo zerado local.
+    const cloudFresh = !!(data && data.data && Number(data.data._fmt || 0) === STATE_FMT);
+    if (cloudFresh && data.updated_at >= (localTime || "")) {
       const currentUser = S.user;
       hydrateParsed(data.data);
       // Identidade vem SEMPRE da sessão viva (fonte autoritativa)
